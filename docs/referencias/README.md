@@ -1,6 +1,12 @@
-# Originales pendientes
+# Referencias originales
 
-No se han recuperado los bytes de los documentos originales. Este archivo registra la ausencia; no sustituye los documentos.
+## Recibidas
+
+[Alenia AI Ticketing Challenge_Participant Kit.pdf](Alenia%20AI%20Ticketing%20Challenge_Participant%20Kit.pdf): original oficial, 7 paginas, octubre 2026. Consultado el 13 de octubre de 2026; fuente P1 en el inventario. Se conserva sin modificar.
+
+## Pendientes
+
+No se han recuperado los bytes de los dos Markdown originales. Este archivo registra la ausencia; no sustituye los documentos.
 
 Archivos que deben adjuntarse y conservarse con su contenido original:
 

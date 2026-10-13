@@ -1,47 +1,52 @@
 # Decisiones
 
-Fecha de consolidacion: 13 de octubre de 2026. Fuentes: [inventario](fuentes-contexto.md). La confirmacion del usuario tiene prioridad sobre recomendaciones del asistente; una propuesta no equivale a trabajo completado.
+Actualizado: 13 de octubre de 2026. [Fuentes](fuentes-contexto.md). El Participant Kit fija el contrato oficial; las decisiones explicitas del usuario fijan las elecciones del proyecto. El resumen U2 aporta contexto reportado, no prueba de ejecucion.
 
-## Confirmadas
+## Confirmadas y vigentes
 
-| ID | Decision | Evidencia |
+| ID | Decision | Fuente |
 | --- | --- | --- |
-| D01 | Usar LangChain como capa del agente | S4, turno `12abefdd-e0a1-41ce-acd6-83ae9e001349`: el usuario corrige expresamente LangGraph; U1 lo ratifica |
-| D02 | Usar uv; no preparar Conda | S5, turno `4f3e857a-2966-4a4c-84e3-4566341bdcdd`: usuario confirma que uv basta; U1 |
-| D03 | Demo y evaluacion desde el inicio, P0 | S1: propuesta en `e4fecfc4-0524-42ec-bec2-150bf50343e2`, aceptada en `34c42af9-db49-4da9-b475-1551e5b94221`; U1 |
-| D04 | Preparar modulos y conectores reutilizables | S3, peticion del usuario en `8401acb2-40d7-4048-97ff-2bf2dfedd9c9`; U1 |
-| D05 | Priorizar evidencia, modelo intercambiable, revision humana y auditabilidad | Propuesta y aceptacion de S1 citadas en D03 |
-| D06 | Interfaz propia y multi-modelo en P2 | Propuesta aceptada de S1; no implica prohibir una interfaz minima de demo |
-| D07 | Conservar conversaciones y documentos originales; excluir secretos | U1; S7 confirma conservar el proyecto original |
-| D08 | Voz y modelos especializados siguen siendo posibilidades | U1; S2 explora Jev y comparacion experimental |
+| D01 | LangChain como capa del agente; no sustituir por LangGraph | S4: correccion del usuario en turno `12abefdd-e0a1-41ce-acd6-83ae9e001349`; U1; P1 pp. 1, 4 |
+| D02 | Python con uv; no Conda para la preparacion | S5: turno `4f3e857a-2966-4a4c-84e3-4566341bdcdd`; U1 |
+| D03 | Demo y evaluacion desde la primera capacidad, P0 | S1: propuesta `e4fecfc4-0524-42ec-bec2-150bf50343e2`, aceptacion `34c42af9-db49-4da9-b475-1551e5b94221`; U1 |
+| D04 | Modulos y conectores pequenos reutilizables | S3: peticion `8401acb2-40d7-4048-97ff-2bf2dfedd9c9`; U1 |
+| D05 | Evidencia, modelos intercambiables, revision humana y auditabilidad | Propuesta aceptada de S1; P1 p. 5 refuerza aprobaciones |
+| D06 | UI y varios modelos despues del nucleo funcional | S1; P1 p. 7 ofrece bonus UI sin hacerla obligatoria |
+| D07 | Conservar originales y excluir secretos de Git | U1; P1 pp. 5-6 |
+| D08 | Voz y modelos especializados siguen siendo exploraciones | U1, S2; U2 |
+| D09 | Aprobacion explicita antes de ejecutar SQL, comentarios y cambios de estado | P1 p. 5 |
+| D10 | Solo herramientas oficiales y SQL autorizado; datos sinteticos del equipo, sin APIs externas | P1 pp. 5-6 |
+| D11 | Databricks, OpenProject, Model Serving y Mosaic AI Vector Search son infraestructura oficial proporcionada | P1 pp. 4-5 |
+| D12 | Clasificar caso y prioridad antes de investigar; elegir entre UC1, UC2 y UC3 | P1 pp. 1-3, 6 |
+| D13 | Sincronizar Mac/cloud mediante commits de GitHub y tareas en ramas | Conversacion actual y E2 |
 
-## Contradicciones resueltas
+## Resolucion de contradicciones
 
-LangGraph aparece en respuestas antiguas de S4 y en la exploracion S2. La correccion posterior del usuario en S4 exige LangChain; S3 ya presenta un arbol basado en LangChain. No adoptar `StateGraph`, nodos ni edges como arquitectura del proyecto por esas respuestas antiguas. Esto no exige prohibir dependencias transitivas que use una version de LangChain.
+- LangGraph aparecia en recomendaciones anteriores. La correccion de S4 y U1 prevalece. Esto no prohibe dependencias transitivas internas de LangChain.
+- Ejemplos antiguos con pip/requirements.txt se adaptaran a uv/pyproject.toml; version Python y librerias deben ser compatibles con el runtime proporcionado.
+- La aprobacion no se limita a modificar datos: P1 exige aprobar tambien SQL de lectura, comentarios y estados. No hay permiso documentado para ejecutar correcciones SQL sobre datos.
+- Los tres casos dejan de ser solo ejemplos: P1 los confirma, con nombres y alcance concretos. UC2 es reconciliacion mensual, no cualquier discrepancia de flota.
+- Los conectores genericos anteriores (`get_job_status`, historial por API, FAISS/Chroma, APIs de modelos externas) no amplian el contrato permitido. Mantenerlos como ideas historicas, no implementarlos como tools de competicion.
+- OpenRouter/LangSmith fueron discutidos antes de conocer las restricciones. No activarlos en competicion sin aclaracion oficial. Evaluacion y trazas locales siguen siendo necesarias y no dependen de un servicio externo.
+- Ayvens es el nombre correcto; Alenia es el nombre del kit. Variantes dictadas como Ivans/Eventos/Alenis no definen otros proveedores.
+- U2 dice "hoy es 12 de octubre"; el plan actual se revisa al 13 de octubre de 2026. La ventana original 7-15 se conserva como antecedente.
 
-El arbol corregido de S4 contiene `requirements.txt` y ejemplos antiguos usan pip. La confirmacion posterior de S5 y U1 establece uv como herramienta elegida. No existe aun un manifiesto ni una version de Python verificada.
+## Orientacion para comenzar
 
-S7 corrige errores de reconocimiento de voz: el nombre es Ayvens y el proyecto original es `hackaton-ayvens-alenia`; `hackaton-alenia` es el proyecto conectado al repositorio. Las variantes Ivans, I-vents o Eventos no identifican otros proyectos confirmados.
+Un agente LangChain sencillo, funciones Python y adaptadores reemplazables. Implementar primero lectura/routing, retrieval y SQL aprobado; despues propuesta basada en evidencias, comentario aprobado y estado aprobado. Demo y evaluacion acompanaran cada paso [S3, U2, U3]. Es una orientacion de implementacion, no una afirmacion de codigo existente.
 
-## Propuestas pendientes
+Scripts modulares y CLI como entrada reproducible; notebooks pueden servir para ejecutar/inspeccionar en Databricks, sin duplicar logica. Docker local sirve como preparacion opcional y no como dependencia de la demo mock [U2, P1 p. 4].
 
-| Propuesta | Estado y aclaracion necesaria | Fuente |
-| --- | --- | --- |
-| Databricks: SDK, SQL, modelos y Vector Search | Preparar interfaces; confirmar servicio disponible, endpoints, datos y necesidad de cada capacidad | S3, S4 |
-| LangSmith desde el primer agente | Recomendado para trazas, evaluacion, coste y latencia; no hay cuenta ni obligatoriedad verificadas. D03 no depende de que este servicio este disponible | S3, S4 |
-| OpenRouter como proveedor intercambiable | Adaptador propuesto; no hay modelo final, presupuesto, cuenta o prueba de acceso confirmados | S3 |
-| OpenProject para tickets | Lectura, comentarios, historial y cambios de estado propuestos; confirmar si es plataforma del reto | S3, S4 |
-| RAG / retrieval | Contrato generico propuesto; Databricks Vector Search, FAISS y Chroma son alternativas, ninguna seleccionada | S3 |
-| Arbol de carpetas y contratos | Revisar y podar modulos antes de implementarlos; no hay aprobacion completa del arbol | S3 |
-| Jev y agentes especializados | Experimento sugerido: comparar routing con una referencia basada en prompts y salida estructurada; adopcion condicionada a resultados | S2 |
+## Pendientes de decision o aclaracion
 
-## Descartadas o aplazadas
-
-- Sustituir LangChain por LangGraph: descartado por D01.
-- Instalar Conda para esta preparacion: innecesario por D02.
-- Convertir voz o Jev en requisitos: incompatible con D08; siguen abiertos como experimentos.
-- Construir la solucion final antes de conocer el reto: S3 recomienda aplazar logica especifica, prompts finales y schemas reales. No consta una decision oficial sobre el alcance del reto.
-
-## Abiertas
-
-Faltan las bases oficiales, los dos documentos v2, el historial anterior de configuracion Git y de cuentas, el estado real de instalaciones y la seleccion del alcance minimo. No se puede resolver con evidencia si los tres casos de uso son obligatorios o ejemplos, ni si Databricks/OpenProject son servicios proporcionados por la organizacion. Ver [faltantes](fuentes-contexto.md#contenido-necesario-para-completar).
+| Tema | Estado |
+| --- | --- |
+| Primer caso de uso y ampliacion | Elegir UC inicial; recomendacion tecnica: comenzar UC1 con fixture pequeno, sin fijarlo como decision del usuario |
+| Acceso tecnico | Falta manual de registro, endpoints, schemas completos, estados de tickets y firmas reales |
+| SQL y contrato | El kit permite SQL ademas de cuatro funciones, pero la regla dice "solo cuatro". Confirmar via Teams el mecanismo y limites de SQL; usar la capacidad descrita, sin inventar APIs |
+| LangSmith/OpenRouter | No activar en competicion hasta aclarar la prohibicion de APIs externas |
+| Coste de presentacion | Organizacion mide coste; aclarar como consultar resultados oficiales |
+| Aprobaciones | Verificar interfaz/mecanismo oficial; la propuesta local asocia aprobacion a payload exacto y caduca si cambia |
+| Multiagente, voz, Jev, Agent Bricks | Sin necesidad demostrada; fuera de P0. Agent Bricks no figura como requisito en P1 |
+| Instalaciones locales | Docker Desktop, OpenProject stable/17 y token reportados en U2; funcionamiento no verificado |
+| Historia original | Dos Markdown v2 y parte de conversaciones siguen pendientes; no bloquean contratos ya fundamentados en P1 |

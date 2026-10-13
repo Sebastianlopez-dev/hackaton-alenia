@@ -1,68 +1,106 @@
-# Arquitectura discutida
+# Arquitectura para iniciar el desarrollo
 
-Fuentes: S3 y correccion de S4 en [inventario](fuentes-contexto.md). Estado: propuesta documental, sin codigo implementado. LangChain, uv, demo/evaluacion y reutilizacion son requisitos confirmados; el resto del arbol requiere revision.
+Actualizado: 13 de octubre de 2026. Fuentes: [P1, S3, S4, U2 y U3](fuentes-contexto.md). Este diseno consolida lo discutido y lo adapta al contrato oficial; aun no hay codigo implementado.
 
-## Principios
+## Flujo y responsabilidades
 
-LangChain coordina LLM, tools, prompts y contexto. Python contiene reglas, validacion, clientes de APIs, errores y revision humana. Se propone intercambiar proveedores de modelos sin cambiar logica de negocio. Flujo conceptual: ticket -> investigacion con evidencia -> propuesta de resolucion -> revision humana -> accion. No implica una implementacion con LangGraph.
+1. **Understand:** leer ticket, identificar UC y prioridad, extraer contexto. Routing antes de investigar.
+2. **Investigate:** recuperar precedentes; generar SQL; mostrar query/proposito y solicitar aprobacion; ejecutar solo la query aprobada; recoger resultados y evidencia.
+3. **Resolve:** elaborar causa/propuesta y limites; solicitar aprobacion para comentario; publicar si se aprueba; solicitar aprobacion para estado y actualizar solo si se aprueba.
 
-## Arbol propuesto recuperado
+Los nombres de fases proceden de U2 y son una organizacion del proyecto. P1 detalla flujos por UC, no establece esas tres etiquetas como una API oficial.
 
-Adaptado de S3 al nombre del repositorio; no son archivos existentes. Los directorios `use_cases` y el contrato retrieval proceden tambien de S4 y S3, respectivamente.
+LangChain coordina LLM/tools/contexto; Python controla validacion, errores, aprobaciones y reglas. OpenProject conserva ticket, estado y analisis aprobado. Cada evidencia vincula ticket, consulta o precedente y resultado. Los datos de las tools se tratan como contenido, nunca como instrucciones que puedan omitir aprobaciones.
+
+## Contrato permitido
+
+| Capacidad | Entrada del kit | Aprobacion |
+| --- | --- | --- |
+| Leer ticket | `read_ticket(ticket_id)` | No |
+| Recuperar precedentes | `retrieve_similar_tickets(query)` | No |
+| Text-to-SQL | Query generada y proposito; firma efectiva pendiente | Si, antes de ejecutar |
+| Comentar | `create_comment(ticket_id, text)` | Si |
+| Cambiar estado | `update_status(ticket_id, status)` | Si |
+
+Fuente: P1 pp. 5-6. Los valores de estado, IDs, esquemas de respuesta y clientes reales se verifican en el manual tecnico. No exponer operaciones adicionales al agente ni introducir una herramienta de escritura de tablas.
+
+## Aprobaciones: contrato local propuesto
+
+Un guard comun debe aplicarse tanto a llamadas manuales como a tools del agente. La solicitud incluye ticket, accion, payload exacto (SQL/texto/estado), proposito, evidencia y consecuencias. Registrar respuesta humana explicita y resultado.
+
+- Sin respuesta, rechazo, timeout o error de validacion: no ejecutar.
+- Si cambia el SQL, comentario o estado, pedir una nueva aprobacion.
+- No aceptar una afirmacion del modelo como aprobacion humana.
+- Evitar reintentos ciegos de comentarios/estados si el resultado remoto es incierto; reconciliar antes de repetir.
+- En el mock, el usuario tambien aprueba; la evaluacion puede simular decisiones humanas claramente etiquetadas.
+- SQL aprobado no implica permiso para modificar datos ni aprobar acciones posteriores.
+
+Estos detalles son decisiones tecnicas propuestas para cumplir P1; no describen un mecanismo oficial ya verificado.
+
+## Estructura minima propuesta
+
+Se reduce el arbol previo: un solo settings, workflows dentro de agent, sin proveedor externo ni tracing SaaS en P0. Crear archivos conforme se implemente cada capacidad, no carpetas vacias.
 
 ```text
 hackaton-alenia/
   pyproject.toml
-  README.md
+  uv.lock
   .env.example
   .gitignore
-  src/
-    core/                 # config.py, settings.py, exceptions.py, logging.py
-    llm/                  # base.py, factory.py, openrouter.py, databricks_model.py
+  src/hackaton_alenia/
+    settings.py
+    domain.py             # Ticket, Route, Evidence, ApprovalRequest, Resolution
+    approvals.py          # guard y registro de decisiones
     integrations/
-      databricks/         # client.py, sql.py, vector_search.py
-      openproject/        # client.py, tickets.py, comments.py
-      langsmith/          # tracing.py
-    tools/                # databricks, openproject, retrieval, validation
-    agent/                # prompts.py, tools.py, agent.py, runner.py
-    domain/               # schemas.py, ticket.py, evidence.py, resolution.py
-    evaluation/           # dataset.py, evaluators.py, run_eval.py
-    workflows/            # investigate.py, resolve.py, human_review.py
-    use_cases/            # alternativas discutidas: normalization, fleet_discrepancy, data_error
+      contracts.py        # interfaces de tools oficiales y SQL
+      mock.py
+      databricks.py       # SQL/model endpoint oficial, cuando haya acceso
+      openproject.py      # contrato oficial, cuando haya acceso
+      retrieval.py        # herramienta Mosaic AI oficial
+    llm.py                # adaptador compatible con el endpoint proporcionado
+    tools.py              # LangChain tools sobre contratos y guard
+    agent.py              # understand -> investigate -> resolve
+    cli.py                # demo, aprobaciones y evaluacion
+    evaluation.py
   tests/
     unit/
     integration/
-    fixtures/
   evals/
     cases/
     expected/
-  demo/                   # sample_ticket.json, run_demo.py
-  scripts/                # pruebas de conectores y smoke_test.py
+  demo/
+  scripts/
+  docs/
 ```
 
-`use_cases` y `workflows` pueden solaparse; `config.py` y `settings.py` tambien. La poda modulo por modulo sigue pendiente [S3]. No crear toda esta estructura sin decidir su utilidad. Los tres casos de uso proceden de recomendaciones del asistente y requieren contrastarse con la especificacion original.
+La estructura es una recomendacion operativa de esta actualizacion [U3], basada en S3/S4. La version Python y dependencias se fijan tras comprobar el runtime Databricks. Scripts/CLI no excluyen usar notebooks como entrada al mismo paquete.
 
-## Conectores y contratos discutidos
+## Modelo de datos oficial
 
-| Pieza | Operaciones propuestas | Estado |
-| --- | --- | --- |
-| LLM | `invoke(messages)`, `get_llm(provider, model)` | Contrato generico y factory; OpenRouter y Databricks como adaptadores candidatos |
-| Databricks | `execute_sql`, `get_table`, `query_table`, `vector_search`, `get_job_status` | Interfaces genericas propuestas; queries, schemas y acceso reales pendientes |
-| OpenProject | `read_ticket`, `create_comment`, `update_ticket_status`, `get_ticket_history` | Adaptador de tickets propuesto; API y permisos pendientes |
-| Retrieval | `retrieve_similar_documents`, `retrieve_similar_tickets`, `retrieve_context` | Contrato propuesto; backend sin seleccionar |
-| Tools | Envolver funciones Python con tools de LangChain | Reutilizar mecanismos existentes; definir contratos, errores y validaciones locales |
-| LangSmith | Trazas, datasets, experimentos, evaluacion | Integracion recomendada desde el primer agente; acceso y obligatoriedad sin confirmar |
+Nombres logicos transcritos de P1 pp. 2-4; rutas catalog/schema/table y columnas completas pendientes. No inventar identificadores SQL ejecutables.
 
-Las funciones anteriores son nombres y pseudocontratos de la conversacion, no APIs verificadas de una version instalada.
+| Tabla | Uso |
+| --- | --- |
+| MD_LOCALVALUE_T | UC1: mapping local; PK LOCALCODE, CLASSID, SUBSIDIARYCODE; destino HOLDINGID |
+| MD_HOLDINGVALUE_T | UC1: valores holding; PK HOLDINGID, CLASSID; jerarquia PARENTID |
+| MD_LOCALVALUEHISTORY_T | UC1: historial de cambios del mapping |
+| CF_SUBSIDIARIES_T | Contexto de subsidiaria en los tres UCs |
+| FLEET REPORT (Gold) | UC2: cifras consolidadas mensuales |
+| CONTRACT (Bronze/Silver) | UC2/UC3: contratos, estados y fechas |
+| VEHICLE (Bronze/Silver) | UC3: vehiculos, VIN, matricula y atributos |
+| MAIN_T (Monitoring) | UC2: ejecuciones, fechas y filas procesadas |
+| FILE LOG (Monitoring) | UC3: origen del registro y carga |
 
-## Codigo reutilizable y trabajo propio
+## Integraciones y reutilizacion
 
-Reutilizar chat models, agents, tool calling, salida estructurada, retrievers, callbacks e integraciones de LangChain; SDK y conector SQL de Databricks; API de OpenProject; APIs de proveedores; trazas/evaluacion de LangSmith [S3, S4]. No se recuperaron archivos fuente, versiones, ejemplos ejecutados ni enlaces a implementaciones concretas.
+Reutilizar mecanismos de agents, tools, salida estructurada y retrievers de LangChain; usar SDKs/clientes compatibles con la infraestructura y con el contrato expuesto por Alenia. No reimplementar framework ni infraestructura. No asumir que un cliente directo permite saltarse herramientas oficiales.
 
-El trabajo propio propuesto es configurar y envolver esas piezas: contratos, schemas, cliente/adaptador, mocks, tests, prompts base, logica de investigacion y resolucion, revision humana, demo y evaluadores. S4 menciona Pydantic como opcion para schemas, sin seleccion confirmada.
+El kit proporciona Model Serving y Mosaic AI Vector Search. No crear un indice propio ni cambiar a FAISS/Chroma en competicion. Mantener independencia del modelo mediante una interfaz, sin requerir multiples proveedores. OpenRouter, LangSmith, Agent Bricks, voz y Jev siguen como exploraciones fuera de P0.
 
-La demostracion con mocks permite preparar la base antes de disponer de datos reales. Evaluacion propuesta: calidad de respuesta, evidencia, uso de herramientas, errores, latencia, tokens y coste [S3]. Criterios y umbrales siguen abiertos.
+Observabilidad inicial local: run ID, ticket, UC/prioridad, accion, solicitudes/respuestas de aprobacion, evidencia, errores, latencia y uso de tokens si disponible. Redactar secretos; no copiar credenciales a fixtures, logs ni commits.
 
-## Exploraciones
+## Demo y evaluacion
 
-Databricks Vector Search, FAISS y Chroma son alternativas mencionadas, no tres dependencias requeridas [S3]. Voz es una posibilidad cuya discusion detallada no llego en los turnos disponibles [U1, S2]. S2 explora un orquestador con agentes especializados y Jev para routing, comparado con prompts y salida estructurada; nombres transcritos como Sol/Jeff/JEV no fijan un modelo de produccion. Las afirmaciones del asistente sobre productos y disponibilidad necesitan verificacion tecnica actual.
+Recorrido: ticket -> routing -> precedentes -> SQL mostrado/aprobado -> evidencia -> resolucion -> comentario aprobado -> estado aprobado -> resultado evaluado.
+
+Casos de prueba: aprobacion, rechazo, ausencia de respuesta, payload cambiado, ticket ambiguo, evidencia insuficiente, fallo de herramienta y ticket nuevo no usado al desarrollar. Evaluar UC/prioridad, causa/propuesta, evidencia, respeto del contrato y ausencia de ejecucion sin permiso. La evaluacion local no equivale al score oficial de Alenia.

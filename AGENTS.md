@@ -1,15 +1,17 @@
 # Instrucciones del proyecto
 
-Lee primero [contexto](docs/contexto-proyecto.md), [decisiones](docs/decisiones.md), [plan](docs/plan-preparacion.md), [arquitectura](docs/arquitectura.md) y [fuentes y cobertura](docs/fuentes-contexto.md).
+Lee [contexto](docs/contexto-proyecto.md), [decisiones](docs/decisiones.md), [plan](docs/plan-preparacion.md), [arquitectura](docs/arquitectura.md) y [fuentes](docs/fuentes-contexto.md). El [Participant Kit](docs/referencias/Alenia%20AI%20Ticketing%20Challenge_Participant%20Kit.pdf) es la fuente oficial P1.
 
-- Usa LangChain como capa del agente. No sustituyas este requisito por una arquitectura LangGraph.
-- Usa uv para la preparacion Python. No introduzcas Conda para el alcance previsto.
-- Incluye demo y evaluacion desde la primera capacidad. Prioriza evidencia, auditabilidad y revision humana segun las decisiones documentadas.
-- Prepara conectores y modulos pequenos reutilizables. Reutiliza SDKs y APIs existentes; verifica versiones y contratos antes de implementar ejemplos del historial.
-- El arbol es propuesto y requiere poda. No inventes schemas, datos reales, prompts finales ni requisitos del hackathon.
-- Databricks, LangSmith, OpenRouter y OpenProject estan discutidos; confirma necesidad y acceso. Voz y modelos especializados son exploraciones.
-- Distingue decisiones del usuario, recomendaciones, trabajo ejecutado y pendientes. Cita fuente y turno para decisiones importantes; registra correcciones posteriores.
-- La migracion es parcial. No reconstruyas ni etiquetes resumenes como documentos originales. Guarda los originales v2 en `docs/referencias/` solo al recuperarlos.
-- No modifiques ni borres conversaciones originales. No guardes credenciales, tokens o secretos en archivos o historial Git.
-- No afirmes que cuentas, instalaciones, integraciones, demo o tests funcionan sin evidencia de ejecucion.
-- Esta tarea escribe en `/workspace/hackaton-alenia`; el destino Mac solicitado es `/Users/adm/Documents/work/hackaton-alenia`, no accesible desde el shell cloud. Verifica el checkout local antes de transferir cambios.
+- Usa Python, uv y LangChain. No sustituyas el requisito por LangGraph; no introduzcas Conda.
+- Desarrolla primero un agente sencillo con contratos pequenos, mocks, demo y evaluacion. No crees el arbol completo por anticipado.
+- Clasifica caso de uso y prioridad antes de investigar. Casos oficiales: UC1 normalizacion, UC2 reconciliacion mensual, UC3 verificacion/correccion. Primer UC aun pendiente de seleccion.
+- Aprobacion humana explicita antes de ejecutar cualquier SQL generado, comentario o cambio de estado. Mostrar payload y proposito; bloquear si no hay respuesta o cambia el payload. El modelo no puede aprobarse a si mismo.
+- Respeta las cuatro funciones oficiales y la capacidad SQL descrita en P1. No agregues tools ni permisos de escritura de datos sin evidencia del contrato.
+- Usa datos sinteticos del equipo y la infraestructura proporcionada: Databricks, OpenProject, Model Serving y Mosaic AI Vector Search. No conectes APIs externas ni modifiques infraestructura en competicion.
+- OpenRouter y LangSmith son exploraciones; no activarlos en competicion sin aclaracion oficial. Mantener evaluacion/trazas locales. Voz, Jev, multiagente complejo y Agent Bricks no son requisitos.
+- Reutiliza SDKs y mecanismos LangChain compatibles con el runtime; verifica firmas, schemas y estados antes de implementar adaptadores reales. Scripts/CLI reproducibles; notebooks solo como entrada al mismo codigo si conviene.
+- No confundir servicios locales reportados con accesos oficiales verificados. No afirmar que instalaciones, integraciones o demo funcionan sin ejecutarlas.
+- No incluir secretos en archivos, fixtures, logs ni Git; credenciales oficiales en vault. Conservar originales y conversaciones.
+- La migracion sigue parcial: dos Markdown v2 y parte del historial pendientes. Citar fuentes y distinguir decisiones, propuestas y trabajo ejecutado.
+- Fecha limite: 16 octubre 2026, 14:00 Europe/Madrid, freeze sin cambios de codigo; presentacion desde 16:00 con tickets nuevos.
+- GitHub conecta cloud y Mac. Antes de trabajar, revisar status, rama y commit; publicar una etapa antes de retomarla en otro checkout. No sobrescribir cambios del usuario.
