@@ -24,4 +24,17 @@ SQL generado, comentarios y cambios de estado requieren aprobacion humana explic
 - [Fuentes y cobertura](docs/fuentes-contexto.md)
 - [Referencias originales](docs/referencias/README.md)
 
-No hay comandos de instalacion/demo disponibles hasta implementar el paquete. Los secretos oficiales se gestionan en vault y no se publican en Git.
+## Dependencias iniciales
+
+Para preparar un entorno local con uv:
+
+```bash
+uv venv --python 3.11
+uv pip install -r requirements.txt
+```
+
+`requirements.txt` incluye LangChain, Pydantic, HTTPX y pytest con rangos de version principal. Python 3.11 es la referencia de preparacion; comprobar compatibilidad con el runtime oficial antes de desplegar. No es un lockfile: al implementar el paquete se consolidaran dependencias en `pyproject.toml` y `uv.lock`.
+
+Los clientes oficiales de Databricks se incorporaran cuando se verifique el contrato tecnico. Aun no hay comandos de demo disponibles. Los secretos oficiales se gestionan en vault y no se publican en Git.
+
+LangChain instala LangGraph y LangSmith como dependencias transitivas; esto no cambia la arquitectura elegida ni activa tracing externo. Mantener `LANGSMITH_TRACING=false` al ejecutar el proyecto.
