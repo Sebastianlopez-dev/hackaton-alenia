@@ -2,6 +2,10 @@
 
 Estado al 13 de octubre de 2026: **pendiente de acceso al entorno del equipo**. No hay una version Python o de LangChain verificada contra ese workspace.
 
+Decision posterior U4: preparar local/cloud con **Python 3.12** y fijar dependencias en uv.lock. Esta eleccion permite avanzar con mocks y no constituye verificacion del runtime oficial. Comprobar destino antes de desplegar; evitar cambios de versiones durante desarrollo salvo necesidad demostrada.
+
+Validacion de preparacion realizada en Linux con Python 3.12.14: `uv sync --locked` correcto; imports de LangChain/Pydantic/HTTPX/pytest, schema Pydantic, invocacion de tool y agente LangChain con FakeListChatModel correctos, sin llamadas externas. Versiones principales instaladas: LangChain 1.4.5, Pydantic 2.14.1, HTTPX 0.28.1, pytest 8.4.2. Dependencias completas en uv.lock; Mac Intel y Databricks no probados.
+
 ## Evidencia disponible
 
 El Participant Kit P1, paginas 4-5, proporciona Databricks Serverless, Unity Catalog, Model Serving y Mosaic AI Vector Search. No identifica version del entorno serverless, Python ni paquetes. No asumir un Databricks Runtime numerado de cluster clasico para este entorno.

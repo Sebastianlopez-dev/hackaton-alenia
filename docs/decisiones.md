@@ -19,11 +19,12 @@ Actualizado: 13 de octubre de 2026. [Fuentes](fuentes-contexto.md). El Participa
 | D11 | Databricks, OpenProject, Model Serving y Mosaic AI Vector Search son infraestructura oficial proporcionada | P1 pp. 4-5 |
 | D12 | Clasificar caso y prioridad antes de investigar; elegir entre UC1, UC2 y UC3 | P1 pp. 1-3, 6 |
 | D13 | Sincronizar Mac/cloud mediante commits de GitHub y tareas en ramas | Conversacion actual y E2 |
+| D14 | Python 3.12 para preparacion local/cloud; dependencias fijadas con uv.lock | U4: usuario elige explicitamente Python 3.12; compatibilidad del workspace oficial aun pendiente |
 
 ## Resolucion de contradicciones
 
 - LangGraph aparecia en recomendaciones anteriores. La correccion de S4 y U1 prevalece. Esto no prohibe dependencias transitivas internas de LangChain.
-- Ejemplos antiguos con pip/requirements.txt se adaptaran a uv/pyproject.toml; version Python y librerias deben ser compatibles con el runtime proporcionado.
+- Python 3.12 queda elegido para preparacion con uv/pyproject.toml y uv.lock. requirements.txt es una exportacion del lock; compatibilidad con el runtime proporcionado pendiente.
 - La aprobacion no se limita a modificar datos: P1 exige aprobar tambien SQL de lectura, comentarios y estados. No hay permiso documentado para ejecutar correcciones SQL sobre datos.
 - Los tres casos dejan de ser solo ejemplos: P1 los confirma, con nombres y alcance concretos. UC2 es reconciliacion mensual, no cualquier discrepancia de flota.
 - Los conectores genericos anteriores (`get_job_status`, historial por API, FAISS/Chroma, APIs de modelos externas) no amplian el contrato permitido. Mantenerlos como ideas historicas, no implementarlos como tools de competicion.

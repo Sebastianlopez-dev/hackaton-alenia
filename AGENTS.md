@@ -2,7 +2,7 @@
 
 Lee [contexto](docs/contexto-proyecto.md), [decisiones](docs/decisiones.md), [plan](docs/plan-preparacion.md), [arquitectura](docs/arquitectura.md) y [fuentes](docs/fuentes-contexto.md). El [Participant Kit](docs/referencias/Alenia%20AI%20Ticketing%20Challenge_Participant%20Kit.pdf) es la fuente oficial P1.
 
-- Usa Python, uv y LangChain. No sustituyas el requisito por LangGraph; no introduzcas Conda.
+- Usa Python 3.12, uv y LangChain. Instala con `uv sync --locked`; declara dependencias en pyproject.toml y actualiza uv.lock deliberadamente. requirements.txt es una exportacion. No sustituyas el requisito por LangGraph; no introduzcas Conda.
 - Desarrolla primero un agente sencillo con contratos pequenos, mocks, demo y evaluacion. No crees el arbol completo por anticipado.
 - Clasifica caso de uso y prioridad antes de investigar. Casos oficiales: UC1 normalizacion, UC2 reconciliacion mensual, UC3 verificacion/correccion. Primer UC aun pendiente de seleccion.
 - Aprobacion humana explicita antes de ejecutar cualquier SQL generado, comentario o cambio de estado. Mostrar payload y proposito; bloquear si no hay respuesta o cambia el payload. El modelo no puede aprobarse a si mismo.

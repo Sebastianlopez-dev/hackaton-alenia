@@ -41,6 +41,7 @@ Las fechas de turnos siguientes son las originales entregadas por la herramienta
 | U3 | Peticion del usuario de actualizar todo para empezar a desarrollar, 13 de octubre de 2026 | Autoriza consolidar requisitos y preparar plan operativo; estructura minima y criterios locales son recomendaciones de implementacion |
 | E2 | Publicacion y sincronizacion posteriores, 13 de octubre de 2026 | Commit inicial 93b8ce4 publicado en main; usuario reporta merge local; main recibido en cloud en f59d19f incluye PDF. Autenticacion local reportada reparada con gh; no se verifico el shell Mac |
 | E3 | Revision de compatibilidad Databricks, 13 de octubre de 2026 | P1 no indica Python/runtime; no hay acceso al workspace configurado en esta sesion; documentacion publica bloqueada por proxy 403. Versiones siguen provisionales; [procedimiento y limites](compatibilidad-databricks.md) |
+| U4 | Usuario: "nice vamos python 3.12", 13 de octubre de 2026 | Eleccion explicita de Python 3.12 para preparacion; no verifica el runtime del equipo |
 
 Los originales deben conservarse en [referencias](referencias/README.md) cuando esten disponibles. No se ha usado un resumen de S1 como si fuera el contenido de D1/D2.
 
