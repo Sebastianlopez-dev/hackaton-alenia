@@ -26,14 +26,14 @@ SQL generado, comentarios y cambios de estado requieren aprobacion humana explic
 
 ## Dependencias iniciales
 
-Para preparar un entorno local con uv:
+Antes de instalar, obtener la version Python del entorno del equipo siguiendo [verificacion de Databricks](docs/compatibilidad-databricks.md). Cuando este confirmada, usar esa misma version localmente:
 
 ```bash
-uv venv --python 3.11
+uv venv --python <version-python-confirmada>
 uv pip install -r requirements.txt
 ```
 
-`requirements.txt` incluye LangChain, Pydantic, HTTPX y pytest con rangos de version principal. Python 3.11 es la referencia de preparacion; comprobar compatibilidad con el runtime oficial antes de desplegar. No es un lockfile: al implementar el paquete se consolidaran dependencias en `pyproject.toml` y `uv.lock`.
+`requirements.txt` incluye LangChain, Pydantic, HTTPX y pytest con rangos de version principal provisionales. Python 3.11 no se ha verificado contra Databricks y no es una version acordada. No es un lockfile: fijar versiones y consolidar `pyproject.toml` y `uv.lock` tras verificar el entorno oficial. La resolucion previa de dependencias no demuestra instalacion ni compatibilidad con el workspace.
 
 Los clientes oficiales de Databricks se incorporaran cuando se verifique el contrato tecnico. Aun no hay comandos de demo disponibles. Los secretos oficiales se gestionan en vault y no se publican en Git.
 
