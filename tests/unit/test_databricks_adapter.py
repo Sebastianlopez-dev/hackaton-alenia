@@ -158,3 +158,46 @@ def test_query_raises_on_closed_state():
     client = _client(transport)
     with pytest.raises(DatabricksSQLError, match="CLOSED"):
         client.query_sql("SELECT 1")
+
+
+def _succeeded(result: dict, manifest_extra: dict | None = None) -> dict:
+    return {
+        "statement_id": "stmt-6",
+        "status": {"state": "SUCCEEDED"},
+        "manifest": {"schema": {"columns": [{"name": "n", "position": 0}]}, **(manifest_extra or {})},
+        "result": result,
+    }
+
+
+def test_query_sends_the_team_catalog_and_schema():
+    captured: dict = {}
+
+    def handler(request: httpx.Request):
+        captured["body"] = json.loads(request.content)
+        return httpx.Response(200, json=_succeeded({"data_array": []}))
+
+    _client(httpx.MockTransport(handler)).query_sql("SELECT 1 AS n")
+
+    assert captured["body"]["catalog"] == "catalog_1"
+    assert captured["body"]["schema"] == "schema_1"
+
+
+def test_query_follows_every_result_chunk():
+    chunk_link = "/api/2.0/sql/statements/stmt-6/result/chunks/1"
+
+    def handler(request: httpx.Request):
+        if request.method == "POST":
+            return httpx.Response(200, json=_succeeded(
+                {"chunk_index": 0, "data_array": [["1"]], "next_chunk_index": 1, "next_chunk_internal_link": chunk_link}))
+        assert request.url.path == chunk_link
+        return httpx.Response(200, json={"chunk_index": 1, "data_array": [["2"]]})
+
+    assert _client(httpx.MockTransport(handler)).query_sql("SELECT n FROM t") == [{"n": "1"}, {"n": "2"}]
+
+
+def test_query_refuses_a_truncated_result():
+    def handler(request: httpx.Request):
+        return httpx.Response(200, json=_succeeded({"data_array": [["1"]]}, {"truncated": True}))
+
+    with pytest.raises(DatabricksSQLError, match="TRUNCATED"):
+        _client(httpx.MockTransport(handler)).query_sql("SELECT n FROM t")

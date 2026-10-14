@@ -60,7 +60,7 @@ def test_create_comment_posts_to_activities():
     result = client.create_comment(42, "Proposed resolution.")
     assert captured["method"] == "POST"
     assert captured["path"].endswith("/api/v3/work_packages/42/activities")
-    assert captured["body"]["comment"]["raw"] == "Proposed resolution."
+    assert captured["body"] == {"comment": {"raw": "Proposed resolution."}}
     assert result["id"] == 7
 
 

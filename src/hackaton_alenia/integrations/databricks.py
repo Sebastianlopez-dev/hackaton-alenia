@@ -49,6 +49,7 @@ class DatabricksSQLClient:
         schema: str,
         poll_interval: float = 1.0,
         max_poll_attempts: int = 30,
+        max_chunks: int = 100,
     ):
         self.client = client
         self.warehouse_id = warehouse_id
@@ -56,6 +57,7 @@ class DatabricksSQLClient:
         self.schema = schema
         self.poll_interval = poll_interval
         self.max_poll_attempts = max_poll_attempts
+        self.max_chunks = max_chunks
 
     def query_sql(self, sql: str) -> list[dict[str, Any]]:
         """Submit ``sql`` and return rows as dictionaries.
@@ -68,6 +70,8 @@ class DatabricksSQLClient:
             json={
                 "statement": sql,
                 "warehouse_id": self.warehouse_id,
+                "catalog": self.catalog,
+                "schema": self.schema,
                 "wait_timeout": "0s",
                 "disposition": "INLINE",
                 "format": "JSON_ARRAY",
@@ -103,9 +107,25 @@ class DatabricksSQLClient:
         raise DatabricksSQLError("TIMEOUT", f"statement did not reach terminal state, last state: {state}")
 
     def _rows_from_result(self, data: dict[str, Any]) -> list[dict[str, Any]]:
+        """Collect every inline chunk; never return a silently partial result.
+
+        An INLINE result can arrive as several chunks, each pointing to the
+        next through ``next_chunk_internal_link``. A result the warehouse
+        marked ``truncated`` is refused: for UC1 a missing row means "no
+        mapping", so a partial result would be a wrong answer, not a short one.
+        """
         manifest = data.get("manifest", {})
-        schema = manifest.get("schema", {})
-        columns = [col["name"] for col in schema.get("columns", [])]
-        result = data.get("result", {})
-        data_array = result.get("data_array", [])
-        return [dict(zip(columns, row, strict=True)) for row in data_array]
+        if manifest.get("truncated"):
+            raise DatabricksSQLError("TRUNCATED", "the result exceeds the inline limit; narrow the query")
+        columns = [col["name"] for col in manifest.get("schema", {}).get("columns", [])]
+        chunk = data.get("result", {})
+        rows: list[dict[str, Any]] = []
+        for _ in range(self.max_chunks):
+            rows.extend(dict(zip(columns, row, strict=True)) for row in chunk.get("data_array", []))
+            link = chunk.get("next_chunk_internal_link")
+            if not link:
+                return rows
+            response = self.client.get(link)
+            response.raise_for_status()
+            chunk = response.json()
+        raise DatabricksSQLError("TRUNCATED", f"more than {self.max_chunks} result chunks; narrow the query")

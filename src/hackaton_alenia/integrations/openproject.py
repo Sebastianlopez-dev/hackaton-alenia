@@ -57,7 +57,7 @@ class OpenProjectClient:
         """Add a comment activity to the work package."""
         response = self.client.post(
             f"/api/v3/work_packages/{ticket_id}/activities",
-            json={"comment": {"format": "markdown", "raw": text}},
+            json={"comment": {"raw": text}},
         )
         response.raise_for_status()
         return response.json()
