@@ -103,3 +103,4 @@ PYTHONPATH=src uv run --locked pytest -q
 - [Arquitectura y contratos](docs/arquitectura.md)
 - [Fuentes y pendientes de recuperación](docs/fuentes-contexto.md)
 - [Referencias originales](docs/referencias/README.md)
+- [CodeGraph: skill de proyecto y CLI local/cloud](docs/codegraph.md)

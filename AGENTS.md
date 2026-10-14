@@ -15,3 +15,4 @@ Lee [contexto](docs/contexto-proyecto.md), [decisiones](docs/decisiones.md), [pl
 - La migracion sigue parcial: dos Markdown v2 y parte del historial pendientes. Citar fuentes y distinguir decisiones, propuestas y trabajo ejecutado.
 - Fecha limite: 16 octubre 2026, 14:00 Europe/Madrid, freeze sin cambios de codigo; presentacion desde 16:00 con tickets nuevos.
 - GitHub conecta cloud y Mac. Antes de trabajar, revisar status, rama y commit; publicar una etapa antes de retomarla en otro checkout. No sobrescribir cambios del usuario.
+- Para preguntas estructurales o cambios de codigo, leer la [skill CodeGraph de proyecto](.agents/skills/codegraph/SKILL.md). Usar `bash scripts/codegraph.sh` si no hay MCP disponible; sincronizar el indice tras cambios. Ver [instalacion y limites](docs/codegraph.md).
