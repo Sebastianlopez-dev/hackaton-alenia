@@ -1,41 +1,62 @@
 # Hackathon Ironhack - Ayvens / Alenia
 
-Base de preparacion para el Alenia AI Ticketing Challenge, 15-16 de octubre de 2026, Madrid. Stack elegido: Python, uv y LangChain; infraestructura oficial Databricks/OpenProject.
+Preparación para el Alenia AI Ticketing Challenge, 15–16 de octubre de 2026, Madrid.
+
+**Stack:** Python 3.12, uv y LangChain. **Infraestructura oficial:** Databricks y OpenProject.
 
 ## Estado
 
-Requisitos oficiales y plan de desarrollo documentados. Codigo, demo, tests y evaluacion aun pendientes de implementacion. Docker/OpenProject local reportados como instalados, sin verificacion desde cloud. La recuperacion de conversaciones y Markdown v2 sigue parcial.
+Documentación y dependencias preparadas. Código, demo, tests y evaluación pendientes. Accesos e integraciones oficiales aún sin verificar.
 
-## Antes de desarrollar
+## Instalación
 
-1. Leer [AGENTS.md](AGENTS.md) y [decisiones](docs/decisiones.md).
-2. Consultar [contrato y arquitectura](docs/arquitectura.md), [plan y criterios de terminado](docs/plan-preparacion.md).
-3. Elegir primer UC y preparar paquete uv, contratos, guard de aprobaciones y demo mock con evaluacion.
-4. Verificar runtime y manual de accesos antes de conectar herramientas reales.
+En macOS o Linux:
 
-SQL generado, comentarios y cambios de estado requieren aprobacion humana explicita. Competicion: solo datos sinteticos del equipo, herramientas oficiales y capacidad SQL descrita; sin APIs externas ni cambios de infraestructura.
+1. Instalar uv si falta:
 
-## Documentacion
+   ```bash
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   ```
 
-- [Contexto y puntuacion](docs/contexto-proyecto.md)
-- [Decisiones y aclaraciones pendientes](docs/decisiones.md)
-- [Plan, calendario y cambio Mac/cloud](docs/plan-preparacion.md)
-- [Arquitectura, contratos y modelo de datos](docs/arquitectura.md)
-- [Fuentes y cobertura](docs/fuentes-contexto.md)
-- [Referencias originales](docs/referencias/README.md)
+2. Abrir una terminal nueva y entrar en la carpeta del repositorio.
 
-## Dependencias iniciales
+3. Instalar Python 3.12:
 
-Python **3.12** es la version elegida para la preparacion local y cloud. Instalar el entorno y las dependencias fijadas (incluye pytest):
+   ```bash
+   uv python install 3.12
+   ```
+
+4. Crear `.venv` e instalar las dependencias del lock:
+
+   ```bash
+   uv sync --locked
+   ```
+
+Repetir en cada equipo; no copiar `.venv`. Versionar `pyproject.toml`, `uv.lock` y `.python-version`.
+
+`requirements.txt` es una exportación; no editarlo a mano. Para regenerarlo:
 
 ```bash
-uv sync --locked
+uv export --locked --format requirements-txt --output-file requirements.txt
 ```
 
-`pyproject.toml` declara dependencias y limita Python a 3.12; `.python-version` selecciona esa version. `uv.lock` fija versiones transitivas para instalaciones reproducibles. `requirements.txt` es una exportacion del lock, incluyendo desarrollo; regenerar con `uv export --locked --format requirements-txt --output-file requirements.txt`. No editar la exportacion a mano.
+## Desarrollo
 
-La compatibilidad con el workspace oficial de Alenia sigue pendiente: ver [verificacion de Databricks](docs/compatibilidad-databricks.md). Esa comprobacion no bloquea desarrollar la demo mock en Python 3.12.
+1. Leer [AGENTS.md](AGENTS.md), [decisiones](docs/decisiones.md) y [arquitectura](docs/arquitectura.md).
+2. Elegir el primer UC y construir una demo mock con pruebas y evaluación.
+3. Verificar [compatibilidad con Databricks](docs/compatibilidad-databricks.md) y contratos oficiales antes de conectar servicios reales.
 
-Los clientes oficiales de Databricks se incorporaran cuando se verifique el contrato tecnico. Aun no hay comandos de demo disponibles. Los secretos oficiales se gestionan en vault y no se publican en Git.
+## Reglas clave
 
-LangChain instala LangGraph y LangSmith como dependencias transitivas; esto no cambia la arquitectura elegida ni activa tracing externo. Mantener `LANGSMITH_TRACING=false` al ejecutar el proyecto.
+- Aprobación humana explícita antes de ejecutar SQL generado, publicar comentarios o cambiar estados.
+- En competición: datos sintéticos del equipo y herramientas oficiales; sin APIs externas ni cambios de infraestructura.
+- Secretos oficiales en vault, nunca en Git. Mantener `LANGSMITH_TRACING=false`.
+
+## Documentación
+
+- [Contexto y puntuación](docs/contexto-proyecto.md)
+- [Decisiones](docs/decisiones.md)
+- [Plan y calendario](docs/plan-preparacion.md)
+- [Arquitectura y contratos](docs/arquitectura.md)
+- [Fuentes y pendientes de recuperación](docs/fuentes-contexto.md)
+- [Referencias originales](docs/referencias/README.md)
