@@ -50,20 +50,21 @@ hackaton-alenia/
   .env.example
   .gitignore
   src/hackaton_alenia/
-    settings.py
-    ticket.py             # informacion capturada del ticket
-    approvals.py          # guard y registro de decisiones
+    settings.py             # configuracion tipada desde entorno; redacta secretos
+    ticket.py               # informacion capturada del ticket
+    approvals.py            # guard y registro de decisiones
     integrations/
-      contracts.py        # interfaces de tools oficiales y SQL
-      services_s.py       # respuestas y acciones simuladas en memoria
-      databricks.py       # SQL/model endpoint oficial, cuando haya acceso
-      openproject.py      # contrato oficial, cuando haya acceso
-      retrieval.py        # herramienta Mosaic AI oficial
-    llm.py                # adaptador compatible con el endpoint proporcionado
-    llm_s.py              # modelo guionado para la demo local
-    tools.py              # LangChain tools sobre contratos y guard
-    agent.py              # understand -> investigate -> resolve
-    cli.py                # demo, aprobaciones y evaluacion
+      contracts.py          # interfaces de tools oficiales y SQL
+      factory.py            # build_services(mode): simulacion o adaptadores live
+      services_s.py         # respuestas y acciones simuladas en memoria
+      databricks.py         # SQL Statement Execution API oficial
+      openproject.py        # API v3 oficial para ticket, comentario y estado
+      vector_search.py      # Mosaic AI Vector Search query oficial
+    llm.py                  # adaptador compatible con el endpoint proporcionado
+    llm_s.py                # modelo guionado para la demo local
+    tools.py                # LangChain tools sobre contratos y guard
+    agent.py                # understand -> investigate -> resolve
+    cli.py                  # demo, aprobaciones y evaluacion
     evaluation.py
   tests/
     unit/
@@ -109,6 +110,17 @@ Reutilizar mecanismos de agents, tools, salida estructurada y retrievers de Lang
 El kit proporciona Model Serving y Mosaic AI Vector Search. No crear un indice propio ni cambiar a FAISS/Chroma en competicion. Mantener independencia del modelo mediante una interfaz, sin requerir multiples proveedores. OpenRouter, LangSmith, Agent Bricks, voz y Jev siguen como exploraciones fuera de P0.
 
 Observabilidad inicial local: run ID, ticket, UC/prioridad, accion, solicitudes/respuestas de aprobacion, evidencia, errores, latencia y uso de tokens si disponible. Redactar secretos; no copiar credenciales a fixtures, logs ni commits.
+
+## Frontera simulacion / live
+
+`ALENIA_MODE` elige en un único punto de composicion, `build_services`, que devuelve una implementacion del protocolo `Services`:
+
+- `simulation` -> `SimulatedServices` con el fixture del caso.
+- `live` -> `LiveServices`, compuesto por los adaptadores oficiales, siempre que todas las variables requeridas esten presentes.
+
+No hay fallback automatico a simulacion en modo live, ni se acepta un fixture simulado cuando se piden servicios live. Faltan credenciales o nombres no verificados -> error de configuracion que nombra las variables, nunca sus valores.
+
+Los adaptadores oficiales estan escritos contra la documentacion publica y testeados con `httpx.MockTransport`. Ninguno ha sido ejecutado contra el entorno de Alenia, por lo que no deben presentarse como verificados. El adaptador de Model Serving no esta implementado: la CLI se niega a arrancar en live con un mensaje explicito.
 
 ## Demo y evaluacion
 

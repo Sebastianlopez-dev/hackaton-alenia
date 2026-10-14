@@ -1,16 +1,23 @@
-"""Run the local simulation with explicit terminal approvals."""
+"""Run the local simulation with explicit terminal approvals.
+
+The active mode is read from ``ALENIA_MODE`` (default ``simulation``). In live
+mode the CLI refuses to start because the model adapter for the official Model
+Serving endpoint is not implemented yet.
+"""
 
 import argparse
 import json
 from pathlib import Path
 from uuid import uuid4
 
+from pydantic import ValidationError
+
 from hackaton_alenia.agent import run_ticket
 from hackaton_alenia.approvals import Approval, ApprovalDenied, AuditApprovalGate
 from hackaton_alenia.evaluation import evaluate
-from hackaton_alenia.integrations.services_s import SimulatedServices
+from hackaton_alenia.integrations.factory import build_services
 from hackaton_alenia.llm_s import simulated_model
-from hackaton_alenia.settings import CASE_PATH, CASES_DIR, EXPECTED_DIR, EXPECTED_PATH
+from hackaton_alenia.settings import CASE_PATH, CASES_DIR, EXPECTED_DIR, EXPECTED_PATH, load_settings
 from hackaton_alenia.sql_guard import is_read_only, read_only_reason
 
 _ACTION_INFO = {
@@ -96,6 +103,19 @@ def main() -> int:
     parser.add_argument("--case", help="Fixture name in evals/cases or an absolute path (default: uc1_missing_mapping_s).")
     parser.add_argument("--evaluate", action="store_true", help="Compare the approved demo result with local expectations.")
     args = parser.parse_args()
+
+    try:
+        settings = load_settings()
+    except ValidationError as error:
+        # Print only the validation messages, never the rejected input values.
+        for problem in error.errors():
+            print(f"Configuration error: {problem['msg'].removeprefix('Value error, ')}")
+        return 2
+    if settings.alenia_mode == "live":
+        print("LIVE: official adapters requested.")
+        print("The live model adapter is not available yet. Refusing to start.")
+        return 1
+
     print("SIMULATION: scripted model and in-memory services; approvals are human.")
     case_path, expected_path = resolve_case_paths(args.case)
     try:
@@ -103,7 +123,7 @@ def main() -> int:
     except (FileNotFoundError, json.JSONDecodeError) as error:
         print(f"Cannot load case {case_path}: {error}")
         return 2
-    services = SimulatedServices(case)
+    services = build_services(settings, simulated_case=case)
     run_id = uuid4().hex
     gate = AuditApprovalGate(
         lambda request: human_decision(request, gate),

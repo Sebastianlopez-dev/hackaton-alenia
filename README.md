@@ -83,9 +83,13 @@ PYTHONPATH=src uv run --locked pytest -q
 | Archivo en `src/hackaton_alenia/` | Responsabilidad |
 | --- | --- |
 | `ticket.py` | Información del ticket |
-| `settings.py` | Rutas locales |
+| `settings.py` | Configuración tipada desde variables de entorno; redacta secretos |
 | `integrations/contracts.py` | Interfaces locales de servicios |
+| `integrations/factory.py` | Punto de composición `build_services` que elige simulación o adaptadores oficiales |
 | `integrations/services_s.py` | Servicios simulados en memoria; conjunto de consultas aprobadas por fixture |
+| `integrations/databricks.py` | Adaptador Databricks SQL Statement Execution API (sin verificar contra Alenia) |
+| `integrations/openproject.py` | Adaptador OpenProject API v3 para ticket, comentario y estado (sin verificar contra Alenia) |
+| `integrations/vector_search.py` | Adaptador Mosaic AI Vector Search query (sin verificar contra Alenia) |
 | `approvals.py` | Decisión humana ligada al payload exacto, más el registro de auditoría de cada solicitud y su resultado |
 | `llm.py` | Clasificación de UC, prioridad y contexto UC1 opcional; contrato de resolución y lectura tolerante de la respuesta del modelo |
 | `llm_s.py` | Respuestas simuladas del modelo |
@@ -96,6 +100,21 @@ PYTHONPATH=src uv run --locked pytest -q
 | `evaluation.py` | Comparación con expectativas locales |
 
 `_s.py` identifica simulaciones; casos y expectativas están en `evals/` como `_s.json`. Los mocks pueden conservarse para pruebas cuando se incorporen adaptadores reales.
+
+## Cambiar a modo live
+
+El modo se elige con la variable de entorno `ALENIA_MODE`:
+
+- `simulation` (predeterminado): modelo guionado y servicios en memoria; es el único modo que funciona hoy.
+- `live`: usa los adaptadores oficiales de Databricks, OpenProject y Mosaic AI Vector Search.
+
+Copia `.env.example` a `.env` y rellena los valores oficiales. No incluyas secretos en el repositorio; la fuente de verdad para credenciales es el vault de Alenia.
+
+**Falta para poder arrancar en live:**
+
+- El adaptador de modelo para Model Serving no está implementado. La CLI se niega a ejecutar en live con un mensaje explícito.
+- Los nombres reales de catálogo, schema, índice, columnas del índice, estados de ticket y endpoint de modelo deben verificarse contra el entorno oficial.
+- Ninguno de los adaptadores ha sido ejecutado contra la infraestructura de Alenia; están escritos contra la documentación pública y testeados únicamente con `httpx.MockTransport`.
 
 ## Reglas clave
 
