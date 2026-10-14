@@ -1,0 +1,4 @@
+{
+  "routing": {"use_case": "UC1", "priority": "high"},
+  "resolution": {"analysis": "ABC has no holding mapping; the correct destination remains unverified.", "evidence": [{"source": "simulated_sql", "local_code": "ABC", "holding_id": null}, {"source": "simulated_precedent", "ticket_id": 99}]}
+}

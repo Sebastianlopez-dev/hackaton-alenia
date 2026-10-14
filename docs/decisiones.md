@@ -1,6 +1,6 @@
 # Decisiones
 
-Actualizado: 13 de octubre de 2026. [Fuentes](fuentes-contexto.md). El Participant Kit fija el contrato oficial; las decisiones explicitas del usuario fijan las elecciones del proyecto. El resumen U2 aporta contexto reportado, no prueba de ejecucion.
+Actualizado: 14 de octubre de 2026. [Fuentes](fuentes-contexto.md). El Participant Kit fija el contrato oficial; las decisiones explicitas del usuario fijan las elecciones del proyecto. El resumen U2 aporta contexto reportado, no prueba de ejecucion.
 
 ## Confirmadas y vigentes
 
@@ -20,6 +20,8 @@ Actualizado: 13 de octubre de 2026. [Fuentes](fuentes-contexto.md). El Participa
 | D12 | Clasificar caso y prioridad antes de investigar; elegir entre UC1, UC2 y UC3 | P1 pp. 1-3, 6 |
 | D13 | Sincronizar Mac/cloud mediante commits de GitHub y tareas en ramas | Conversacion actual y E2 |
 | D14 | Python 3.12 para preparacion local/cloud; dependencias fijadas con uv.lock | U4: usuario elige explicitamente Python 3.12; compatibilidad del workspace oficial aun pendiente |
+| D15 | Usar `ticket.py` en lugar del nombre propuesto `domain.py` para capturar la informacion del ticket; empezar con `id`, `title` y `description` | Decision explicita del usuario, 14 de octubre de 2026; modelo local, no schema oficial |
+| D16 | Identificar modulos simulados con `_s.py`; construir la primera demo local completa | Usuario acepta `_s.py` y autoriza crear la lista de archivos, 14 de octubre de 2026 |
 
 ## Resolucion de contradicciones
 
