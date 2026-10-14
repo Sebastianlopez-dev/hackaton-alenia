@@ -1,0 +1,39 @@
+"""The approval message must never reassure the human about an unverified read."""
+
+from hackaton_alenia.approvals import ApprovalRequest
+from hackaton_alenia.cli import _approval_prompt
+from hackaton_alenia.sql_guard import read_only_reason
+
+CONTEXT = {"use_case": "UC1", "priority": "high"}
+
+
+def test_the_prompt_states_read_only_for_a_recognised_read():
+    request = ApprovalRequest("sql", 101, "SELECT 1", "Probe the mapping")
+
+    prompt = _approval_prompt(request, CONTEXT, 1)
+
+    assert "read-only" in prompt
+    assert "it will not modify any table" in prompt
+
+
+def test_the_prompt_never_claims_read_only_for_a_statement_that_can_write():
+    request = ApprovalRequest("sql", 101, "DELETE FROM MD_LOCALVALUE_T", "Clean up")
+
+    prompt = _approval_prompt(request, CONTEXT, 1)
+
+    assert "NOT VERIFIED AS READ-ONLY" in prompt
+    assert "it will not modify any table" not in prompt
+    reason = read_only_reason(request.payload)
+    assert reason is not None
+    assert reason in prompt
+
+
+def test_the_prompt_keeps_the_payload_binding_visible():
+    request = ApprovalRequest("sql", 101, "DELETE FROM MD_LOCALVALUE_T", "Clean up")
+
+    prompt = _approval_prompt(request, CONTEXT, 3)
+
+    assert request.payload in prompt
+    assert request.purpose in prompt
+    assert "#3" in prompt
+    assert "UC1" in prompt and "high" in prompt

@@ -26,6 +26,12 @@ def run_ticket(ticket_id, services, model, gate) -> dict:
 def _run_ticket(ticket_id, services, model, gate) -> dict:
     ticket = services.read_ticket(ticket_id)
     routing = classify_ticket(model, ticket)
+    if hasattr(gate, "set_context"):
+        gate.set_context(
+            ticket_id=ticket.id,
+            use_case=routing.use_case,
+            priority=routing.priority,
+        )
     agent = create_agent(
         model=model,
         tools=ticket_tools(services, gate, ticket_id),

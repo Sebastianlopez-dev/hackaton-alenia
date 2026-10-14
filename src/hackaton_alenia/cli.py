@@ -3,22 +3,80 @@
 import argparse
 import json
 from pathlib import Path
+from uuid import uuid4
 
 from hackaton_alenia.agent import run_ticket
-from hackaton_alenia.approvals import Approval, ApprovalDenied, ApprovalGate
+from hackaton_alenia.approvals import Approval, ApprovalDenied, AuditApprovalGate
 from hackaton_alenia.evaluation import evaluate
 from hackaton_alenia.integrations.services_s import SimulatedServices
 from hackaton_alenia.llm_s import simulated_model
 from hackaton_alenia.settings import CASE_PATH, CASES_DIR, EXPECTED_DIR, EXPECTED_PATH
+from hackaton_alenia.sql_guard import is_read_only, read_only_reason
+
+_ACTION_INFO = {
+    "sql": (
+        "Run a read-only SQL query",
+        "read-only",
+        "This action only reads data; it will not modify any table.",
+        "query",
+    ),
+    "comment": (
+        "Publish a comment on the ticket",
+        "ticket state change",
+        "This action changes the ticket state; it does not modify data tables.",
+        "comment text",
+    ),
+    "status": (
+        "Update the ticket status",
+        "ticket state change",
+        "This action changes the ticket status; it does not modify data tables.",
+        "status value",
+    ),
+}
 
 
-def human_decision(request):
-    print(f"\nAction: {request.action}\nTicket: {request.ticket_id}\nPayload: {request.payload}\nPurpose: {request.purpose}")
+def _action_info(request):
+    """Never reassure the human about a statement the local check cannot clear."""
+    if request.action == "sql" and not is_read_only(request.payload):
+        return (
+            "Run a SQL statement NOT recognised as read-only",
+            "NOT VERIFIED AS READ-ONLY",
+            f"WARNING: this statement was not recognised as a single read-only query "
+            f"({read_only_reason(request.payload)}). It may modify data or storage. "
+            f"The local check is a guard rail, not a security boundary: it can be wrong "
+            f"in both directions, so verify the statement yourself before approving.",
+            "statement",
+        )
+    return _ACTION_INFO[request.action]
+
+
+def _approval_prompt(request, context, sequence):
+    kind, scope, scope_note, thing = _action_info(request)
+    return (
+        f"\n--- Approval request #{sequence} ---\n"
+        f"Use case: {context.get('use_case', 'unknown')} | "
+        f"Priority: {context.get('priority', 'unknown')}\n"
+        f"Ticket: {request.ticket_id}\n"
+        f"Action kind: {kind} ({scope})\n"
+        f"{scope_note}\n"
+        f"\n"
+        f"Payload: {request.payload}\n"
+        f"Purpose: {request.purpose}\n"
+        f"\n"
+        f'If you type "approve", the agent will execute the exact {thing} shown above.\n'
+        f"If you type anything else or press Ctrl-D, the run stops here and NOTHING is executed.\n"
+        f"\n"
+        f"Type approve to execute this simulated action: "
+    )
+
+
+def human_decision(request, gate):
+    print(_approval_prompt(request, gate.context, gate.sequence))
     try:
-        approved = input("Type approve to execute this simulated action: ").strip() == "approve"
+        answer = input().strip()
     except (EOFError, KeyboardInterrupt):
-        approved = False
-    return Approval(request, approved)
+        return None
+    return Approval(request, answer == "approve")
 
 
 def resolve_case_paths(case_arg: str | None) -> tuple[Path, Path]:
@@ -46,10 +104,20 @@ def main() -> int:
         print(f"Cannot load case {case_path}: {error}")
         return 2
     services = SimulatedServices(case)
+    run_id = uuid4().hex
+    gate = AuditApprovalGate(
+        lambda request: human_decision(request, gate),
+        run_id=run_id,
+    )
     try:
-        result = run_ticket(case["ticket"]["id"], services, simulated_model(case), ApprovalGate(human_decision))
+        result = run_ticket(case["ticket"]["id"], services, simulated_model(case), gate)
     except ApprovalDenied as error:
+        result = {
+            "run_id": run_id,
+            "audit": [entry.as_dict() for entry in gate.ledger],
+        }
         print(str(error))
+        print(json.dumps(result, indent=2))
         return 1
     result["simulation"] = True
     if args.evaluate:
@@ -59,6 +127,8 @@ def main() -> int:
             print(f"Cannot load expected result {expected_path}: {error}")
             return 2
         result["evaluation"] = evaluate(result, expected)
+    result["run_id"] = run_id
+    result["audit"] = [entry.as_dict() for entry in gate.ledger]
     print(json.dumps(result, indent=2))
     return 0 if result.get("evaluation", {}).get("passed", True) else 1
 

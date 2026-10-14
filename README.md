@@ -61,7 +61,7 @@ Desde la raíz, ejecutar la demo:
 PYTHONPATH=src uv run --locked python -m hackaton_alenia.cli --evaluate
 ```
 
-Muestra payload y propósito; escribir `approve` para cada acción. Rechazo o falta de respuesta bloquean la ejecución. Modelo y resultados están guionados: no prueba razonamiento de IA ni integraciones reales. La corrida está acotada: si el modelo no devuelve una resolución válida o no termina dentro del límite, el resultado es una abstención explícita, no una excepción.
+Muestra el contexto de ruteo (UC y prioridad), el tipo de acción, si solo lee o cambia estado, el payload/propósito, la posición dentro de la secuencia y las consecuencias de aprobar o rechazar. Un statement que la comprobación local no reconoce como lectura se presenta como **NOT VERIFIED AS READ-ONLY** en lugar de afirmar que solo lee. Escribir `approve` para cada acción. Rechazo o falta de respuesta bloquean la ejecución; una respuesta alterada no autoriza la solicitud. Al finalizar, la salida incluye un `run_id` y una lista `audit` con cada solicitud, resultado (`approved`, `rejected`, `absent`, `changed_payload`) y timestamp. Modelo y resultados están guionados: no prueba razonamiento de IA ni integraciones reales. La corrida está acotada: si el modelo no devuelve una resolución válida o no termina dentro del límite, el resultado es una abstención explícita, no una excepción.
 
 Ejecutar otros fixtures UC1:
 
@@ -86,10 +86,11 @@ PYTHONPATH=src uv run --locked pytest -q
 | `settings.py` | Rutas locales |
 | `integrations/contracts.py` | Interfaces locales de servicios |
 | `integrations/services_s.py` | Servicios simulados en memoria; conjunto de consultas aprobadas por fixture |
-| `approvals.py` | Decisión humana ligada al payload exacto |
+| `approvals.py` | Decisión humana ligada al payload exacto, más el registro de auditoría de cada solicitud y su resultado |
 | `llm.py` | Clasificación de UC, prioridad y contexto UC1 opcional; contrato de resolución y lectura tolerante de la respuesta del modelo |
 | `llm_s.py` | Respuestas simuladas del modelo |
 | `tools.py` | Tools permitidas con guard de aprobación; un fallo de capacidad vuelve al modelo como dato |
+| `sql_guard.py` | Clasificación sólo-lectura a nivel de statement; guard rail, no frontera de seguridad |
 | `agent.py` | Coordinación LangChain con límite de pasos y abstención |
 | `cli.py` | Demo, aprobaciones por terminal y selección de fixture |
 | `evaluation.py` | Comparación con expectativas locales |

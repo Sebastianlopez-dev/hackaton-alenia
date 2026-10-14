@@ -35,6 +35,8 @@ Un guard comun debe aplicarse tanto a llamadas manuales como a tools del agente.
 - En el mock, el usuario tambien aprueba; la evaluacion puede simular decisiones humanas claramente etiquetadas.
 - SQL aprobado no implica permiso para modificar datos ni aprobar acciones posteriores.
 
+La CLI enriquece el mensaje de aprobacion con el UC/prioridad, el tipo de accion, si solo lee o cambia estado, el payload/proposito, la posicion en la secuencia y las consecuencias de aprobar o rechazar. `AuditApprovalGate` (en `approvals.py`) registra cada solicitud con run ID, secuencia, timestamp, token, resultado (`approved`, `rejected`, `absent`, `changed_payload`) y si la accion se ejecuto; el registro nunca contiene credenciales. Para acciones `sql`, el mensaje solo afirma solo-lectura cuando `sql_guard.py` reconoce el statement como una lectura unica; si no, muestra `NOT VERIFIED AS READ-ONLY` con el motivo. `sql_guard` es un guard rail, no una frontera de seguridad: la frontera real sera la credencial y el permiso del warehouse.
+
 Estos detalles son decisiones tecnicas propuestas para cumplir P1; no describen un mecanismo oficial ya verificado.
 
 ## Estructura minima propuesta

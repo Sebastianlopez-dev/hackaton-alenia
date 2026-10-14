@@ -35,3 +35,44 @@ def test_cli_can_run_an_alternate_fixture():
     )
     assert result.returncode == 0
     assert '"passed": true' in result.stdout
+
+
+def _run_cli(args, input_text):
+    return subprocess.run(
+        [sys.executable, "-m", "hackaton_alenia.cli", *args],
+        input=input_text,
+        text=True,
+        capture_output=True,
+        check=False,
+        env={**os.environ, "PYTHONPATH": "src"},
+    )
+
+
+def test_cli_prompt_shows_routing_context_and_consequences():
+    result = _run_cli(["--evaluate"], "approve\n" * 6)
+    assert result.returncode == 0
+    assert "Use case:" in result.stdout
+    assert "Priority:" in result.stdout
+    assert "Approval request #" in result.stdout
+    assert 'If you type "approve"' in result.stdout
+    assert "the run stops here and NOTHING is executed" in result.stdout
+
+
+def test_cli_includes_audit_ledger_after_success():
+    result = _run_cli(["--evaluate"], "approve\n" * 6)
+    assert result.returncode == 0
+    assert '"audit"' in result.stdout
+    assert '"outcome": "approved"' in result.stdout
+    assert '"run_id"' in result.stdout
+
+
+def test_cli_audit_records_a_denied_decision():
+    result = _run_cli(["--evaluate"], "reject\n")
+    assert result.returncode == 1
+    assert '"outcome": "rejected"' in result.stdout
+
+
+def test_cli_audit_records_an_absent_decision():
+    result = _run_cli(["--evaluate"], "")
+    assert result.returncode == 1
+    assert '"outcome": "absent"' in result.stdout
