@@ -1,0 +1,48 @@
+{
+  "routing": {
+    "use_case": "UC1",
+    "priority": "high",
+    "subsidiary": "ES",
+    "class": "CHANNEL",
+    "affected_local_code": "CH_ES"
+  },
+  "resolution": {
+    "analysis": "Local code CH_ES in ES is mapped to H_X, while peer subsidiaries consistently map CH_ES to H_CH. The ES history record also shows H_CH as the previous mapping. H_CH exists and is in the expected hierarchy, so the mapping should be corrected to H_CH.",
+    "proposed_correction": "Set MD_LOCALVALUE_T.HOLDINGID to H_CH for LOCALCODE='CH_ES', CLASSID='CHANNEL', SUBSIDIARYCODE='ES'.",
+    "impacted_records": [
+      "CH_ES"
+    ],
+    "evidence": [
+      {
+        "source": "MD_LOCALVALUE_T",
+        "detail": "CH_ES in ES maps to HOLDINGID H_X"
+      },
+      {
+        "source": "MD_HOLDINGVALUE_T",
+        "detail": "H_X exists but is under H_ROOT_WRONG hierarchy"
+      },
+      {
+        "source": "MD_LOCALVALUE_T",
+        "detail": "peer subsidiaries PT and IT map CH_ES to H_CH"
+      },
+      {
+        "source": "MD_HOLDINGVALUE_T",
+        "detail": "H_CH exists and belongs to H_ROOT hierarchy"
+      },
+      {
+        "source": "MD_LOCALVALUEHISTORY_T",
+        "detail": "ES mapping was H_CH before 2026-09-15T10:30:00Z"
+      },
+      {
+        "source": "CF_SUBSIDIARIES_T",
+        "detail": "subsidiary ES context loaded"
+      },
+      {
+        "source": "simulated_precedent",
+        "detail": "ticket 60: cross-subsidiary consistency detects incorrect holding mappings"
+      }
+    ],
+    "confidence": "high",
+    "abstention_reason": null
+  }
+}

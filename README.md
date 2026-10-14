@@ -63,6 +63,13 @@ PYTHONPATH=src uv run --locked python -m hackaton_alenia.cli --evaluate
 
 Muestra payload y propósito; escribir `approve` para cada acción. Rechazo o falta de respuesta bloquean la ejecución. Modelo y resultados están guionados: no prueba razonamiento de IA ni integraciones reales. La corrida está acotada: si el modelo no devuelve una resolución válida o no termina dentro del límite, el resultado es una abstención explícita, no una excepción.
 
+Ejecutar otros fixtures UC1:
+
+```bash
+PYTHONPATH=src uv run --locked python -m hackaton_alenia.cli --case uc1_holding_changed_s --evaluate
+PYTHONPATH=src uv run --locked python -m hackaton_alenia.cli --case uc1_reporting_mismatch_s --evaluate
+```
+
 Ejecutar las pruebas:
 
 ```bash
@@ -78,13 +85,13 @@ PYTHONPATH=src uv run --locked pytest -q
 | `ticket.py` | Información del ticket |
 | `settings.py` | Rutas locales |
 | `integrations/contracts.py` | Interfaces locales de servicios |
-| `integrations/services_s.py` | Servicios simulados en memoria |
+| `integrations/services_s.py` | Servicios simulados en memoria; conjunto de consultas aprobadas por fixture |
 | `approvals.py` | Decisión humana ligada al payload exacto |
-| `llm.py` | Clasificación de UC y prioridad, contrato de resolución y lectura tolerante de la respuesta del modelo |
+| `llm.py` | Clasificación de UC, prioridad y contexto UC1 opcional; contrato de resolución y lectura tolerante de la respuesta del modelo |
 | `llm_s.py` | Respuestas simuladas del modelo |
 | `tools.py` | Tools permitidas con guard de aprobación; un fallo de capacidad vuelve al modelo como dato |
 | `agent.py` | Coordinación LangChain con límite de pasos y abstención |
-| `cli.py` | Demo y aprobaciones por terminal |
+| `cli.py` | Demo, aprobaciones por terminal y selección de fixture |
 | `evaluation.py` | Comparación con expectativas locales |
 
 `_s.py` identifica simulaciones; casos y expectativas están en `evals/` como `_s.json`. Los mocks pueden conservarse para pruebas cuando se incorporen adaptadores reales.

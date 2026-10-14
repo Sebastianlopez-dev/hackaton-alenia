@@ -35,7 +35,7 @@ def _run_ticket(ticket_id, services, model, gate) -> dict:
     try:
         state = agent.invoke(
             {"messages": [{"role": "user", "content": json.dumps(
-                {"ticket": ticket.model_dump(), "routing": routing.model_dump()})}]},
+                {"ticket": ticket.model_dump(), "routing": routing.model_dump(by_alias=True)})}]},
             config={"recursion_limit": RECURSION_LIMIT},
         )
     except GraphRecursionError:
@@ -47,4 +47,4 @@ def _run_ticket(ticket_id, services, model, gate) -> dict:
 
 
 def _result(routing, resolution: Resolution) -> dict:
-    return {"routing": routing.model_dump(), "resolution": resolution.model_dump()}
+    return {"routing": routing.model_dump(by_alias=True), "resolution": resolution.model_dump()}

@@ -1,0 +1,108 @@
+{
+  "ticket": {
+    "id": 101,
+    "title": "New local code without holding mapping",
+    "description": "Synthetic example: new local code CH_NEW in subsidiary ES, class CHANNEL, has no holding mapping."
+  },
+  "routing": {
+    "use_case": "UC1",
+    "priority": "high",
+    "subsidiary": "ES",
+    "class": "CHANNEL",
+    "affected_local_code": "CH_NEW"
+  },
+  "precedents": [
+    {
+      "ticket_id": 99,
+      "summary": "Check holding candidates before proposing a mapping."
+    }
+  ],
+  "approved_queries": {
+    "SELECT LOCALCODE, CLASSID, SUBSIDIARYCODE, HOLDINGID FROM MD_LOCALVALUE_T WHERE LOCALCODE = 'CH_NEW' AND CLASSID = 'CHANNEL' AND SUBSIDIARYCODE = 'ES'": [
+      {
+        "LOCALCODE": "CH_NEW",
+        "CLASSID": "CHANNEL",
+        "SUBSIDIARYCODE": "ES",
+        "HOLDINGID": null
+      }
+    ],
+    "SELECT LOCALCODE, CLASSID, SUBSIDIARYCODE, HOLDINGID, CHANGED_AT FROM MD_LOCALVALUEHISTORY_T WHERE LOCALCODE = 'CH_NEW' AND CLASSID = 'CHANNEL' AND SUBSIDIARYCODE = 'ES' ORDER BY CHANGED_AT DESC LIMIT 1": []
+  },
+  "tool_calls": [
+    {
+      "name": "retrieve_similar_tickets",
+      "args": {
+        "query": "new local code CH_NEW CHANNEL ES"
+      }
+    },
+    {
+      "name": "query_sql",
+      "args": {
+        "sql": "SELECT LOCALCODE, CLASSID, SUBSIDIARYCODE, HOLDINGID FROM MD_LOCALVALUE_T WHERE LOCALCODE = 'CH_NEW' AND CLASSID = 'CHANNEL' AND SUBSIDIARYCODE = 'ES'",
+        "purpose": "Check whether local code CH_NEW has a valid holding mapping"
+      }
+    },
+    {
+      "name": "query_sql",
+      "args": {
+        "sql": "SELECT LOCALCODE, CLASSID, SUBSIDIARYCODE, HOLDINGID, CHANGED_AT FROM MD_LOCALVALUEHISTORY_T WHERE LOCALCODE = 'CH_NEW' AND CLASSID = 'CHANNEL' AND SUBSIDIARYCODE = 'ES' ORDER BY CHANGED_AT DESC LIMIT 1",
+        "purpose": "Check recent history for local code CH_NEW"
+      }
+    },
+    {
+      "name": "create_comment",
+      "args": {
+        "ticket_id": 101,
+        "text": "Local code CH_NEW (subsidiary ES, class CHANNEL) has no confirmed holding mapping and no historical record provides a candidate. A holding candidate must be identified before proposing a correction; do not modify data."
+      }
+    },
+    {
+      "name": "update_status",
+      "args": {
+        "ticket_id": 101,
+        "status": "review_required"
+      }
+    }
+  ],
+  "resolution": {
+    "analysis": "Local code CH_NEW currently has no holding mapping and no historical record provides a candidate. The correct destination remains unverified.",
+    "proposed_correction": "",
+    "impacted_records": [
+      "CH_NEW"
+    ],
+    "evidence": [
+      {
+        "source": "MD_LOCALVALUE_T",
+        "detail": "local code CH_NEW has HOLDINGID null"
+      },
+      {
+        "source": "MD_LOCALVALUEHISTORY_T",
+        "detail": "no historical mapping found for CH_NEW"
+      },
+      {
+        "source": "simulated_precedent",
+        "detail": "ticket 99: check holding candidates before proposing a mapping"
+      }
+    ],
+    "confidence": "low",
+    "abstention_reason": "No confirmed holding candidate exists for local code CH_NEW."
+  },
+  "expected_actions": [
+    {
+      "action": "sql",
+      "payload": "SELECT LOCALCODE, CLASSID, SUBSIDIARYCODE, HOLDINGID FROM MD_LOCALVALUE_T WHERE LOCALCODE = 'CH_NEW' AND CLASSID = 'CHANNEL' AND SUBSIDIARYCODE = 'ES'"
+    },
+    {
+      "action": "sql",
+      "payload": "SELECT LOCALCODE, CLASSID, SUBSIDIARYCODE, HOLDINGID, CHANGED_AT FROM MD_LOCALVALUEHISTORY_T WHERE LOCALCODE = 'CH_NEW' AND CLASSID = 'CHANNEL' AND SUBSIDIARYCODE = 'ES' ORDER BY CHANGED_AT DESC LIMIT 1"
+    },
+    {
+      "action": "comment",
+      "payload": "Local code CH_NEW (subsidiary ES, class CHANNEL) has no confirmed holding mapping and no historical record provides a candidate. A holding candidate must be identified before proposing a correction; do not modify data."
+    },
+    {
+      "action": "status",
+      "payload": "review_required"
+    }
+  ]
+}

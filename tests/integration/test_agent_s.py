@@ -11,9 +11,8 @@ from hackaton_alenia.evaluation import evaluate
 from hackaton_alenia.integrations.services_s import SimulatedServices
 from hackaton_alenia.llm_s import SimulatedModel, simulated_model
 
-
-CASE = Path("evals/cases/ticket_demo_s.json")
-EXPECTED = Path("evals/expected/ticket_demo_s.json")
+CASE = Path("evals/cases/uc1_missing_mapping_s.json")
+EXPECTED = Path("evals/expected/uc1_missing_mapping_s.json")
 
 
 def approve_all(request):
@@ -28,7 +27,7 @@ def test_complete_simulated_ticket():
         shown.append(request)
         return Approval(request, True)
     result = run_ticket(case["ticket"]["id"], services, simulated_model(case), ApprovalGate(approve))
-    assert [request.action for request in shown] == ["sql", "comment", "status"]
+    assert [request.action for request in shown] == ["sql", "sql", "comment", "status"]
     assert evaluate(result, json.loads(EXPECTED.read_text()))["passed"] is True
     assert services.actions == case["expected_actions"]
 
@@ -49,8 +48,13 @@ def test_unapproved_action_never_reaches_the_service(blocked_action, decision):
     gate = ApprovalGate(respond)
     with pytest.raises(ApprovalDenied):
         run_ticket(101, services, simulated_model(case), gate)
-    index = ["sql", "comment", "status"].index(blocked_action)
-    assert services.actions == case["expected_actions"][:index]
+    # Every action before the first blocked action was approved; the blocked
+    # action itself and anything after it must not have run.
+    first_blocked = next(
+        (index for index, action in enumerate(case["expected_actions"]) if action["action"] == blocked_action),
+        len(case["expected_actions"]),
+    )
+    assert services.actions == case["expected_actions"][:first_blocked]
 
 
 def test_a_model_that_never_returns_a_resolution_ends_in_an_abstention():
@@ -72,8 +76,9 @@ def test_a_model_that_never_returns_a_resolution_ends_in_an_abstention():
 
 def test_a_failing_capability_does_not_break_the_run():
     case = json.loads(CASE.read_text())
-    case["sql"] = "SELECT causal_code FROM somewhere_else"
-    case["tool_calls"] = [case["tool_calls"][1]]
+    case["tool_calls"] = [
+        {"name": "query_sql", "args": {"sql": "SELECT causal_code FROM somewhere_else", "purpose": "Probe"}}
+    ]
     services = SimulatedServices(case)
 
     result = run_ticket(case["ticket"]["id"], services, simulated_model(case), ApprovalGate(approve_all))

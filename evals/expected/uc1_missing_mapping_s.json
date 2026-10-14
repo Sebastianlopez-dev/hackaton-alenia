@@ -1,0 +1,32 @@
+{
+  "routing": {
+    "use_case": "UC1",
+    "priority": "high",
+    "subsidiary": "ES",
+    "class": "CHANNEL",
+    "affected_local_code": "CH_NEW"
+  },
+  "resolution": {
+    "analysis": "Local code CH_NEW currently has no holding mapping and no historical record provides a candidate. The correct destination remains unverified.",
+    "proposed_correction": "",
+    "impacted_records": [
+      "CH_NEW"
+    ],
+    "evidence": [
+      {
+        "source": "MD_LOCALVALUE_T",
+        "detail": "local code CH_NEW has HOLDINGID null"
+      },
+      {
+        "source": "MD_LOCALVALUEHISTORY_T",
+        "detail": "no historical mapping found for CH_NEW"
+      },
+      {
+        "source": "simulated_precedent",
+        "detail": "ticket 99: check holding candidates before proposing a mapping"
+      }
+    ],
+    "confidence": "low",
+    "abstention_reason": "No confirmed holding candidate exists for local code CH_NEW."
+  }
+}

@@ -9,7 +9,7 @@ from hackaton_alenia.approvals import Approval, ApprovalDenied, ApprovalGate
 from hackaton_alenia.integrations.services_s import SimulatedServices
 from hackaton_alenia.tools import ticket_tools
 
-CASE = json.loads(Path("evals/cases/ticket_demo_s.json").read_text())
+CASE = json.loads(Path("evals/cases/uc1_missing_mapping_s.json").read_text())
 
 
 def tools_for(decision):
@@ -35,8 +35,9 @@ def test_reading_outside_the_active_ticket_reaches_the_model_as_data():
 
 def test_a_human_refusal_is_never_swallowed():
     tools, services = tools_for(False)
+    approved_sql = next(iter(CASE["approved_queries"]))
 
     with pytest.raises(ApprovalDenied):
-        tools["query_sql"].invoke({"sql": CASE["sql"], "purpose": "Probe"})
+        tools["query_sql"].invoke({"sql": approved_sql, "purpose": "Probe"})
 
     assert services.actions == []

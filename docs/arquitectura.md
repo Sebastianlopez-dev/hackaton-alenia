@@ -4,7 +4,7 @@ Actualizado: 14 de octubre de 2026. Fuentes: [P1, S3, S4, U2 y U3](fuentes-conte
 
 ## Flujo y responsabilidades
 
-1. **Understand:** leer ticket, identificar UC y prioridad, extraer contexto. Routing antes de investigar.
+1. **Understand:** leer ticket, identificar UC y prioridad, extraer contexto. Routing antes de investigar; para UC1 el mismo llamado de clasificacion extrae subsidiaria, clase y codigo local afectado cuando el ticket lo indica.
 2. **Investigate:** recuperar precedentes; generar SQL; mostrar query/proposito y solicitar aprobacion; ejecutar solo la query aprobada; recoger resultados y evidencia.
 3. **Resolve:** elaborar causa/propuesta y limites; solicitar aprobacion para comentario; publicar si se aprueba; solicitar aprobacion para estado y actualizar solo si se aprueba.
 
@@ -79,6 +79,8 @@ Por decision del usuario (14 de octubre), `ticket.py` sustituye el nombre propue
 El sufijo `_s.py` identifica los modulos simulados. `llm.py` clasifica mediante el modelo recibido; aun no hay adaptador Model Serving. La demo UC1 es un ejemplo guionado, no una eleccion definitiva ni cobertura completa de UC1. `demo_mapping`, `review_required` y las prioridades son valores locales, no nombres oficiales. SQL solo compara el texto con el fixture y devuelve filas sinteticas; no ejecuta una base de datos. Las trazas externas se desactivan durante el agente.
 
 Ejecutar mediante la CLI o `run_ticket`, que desactiva tracing externo. Invocar tools directamente fuera de ese contexto requiere mantener `LANGSMITH_TRACING=false`.
+
+La demo local UC1 cubre los siete pasos del kit usando las tablas oficiales (nombres logicos): `MD_LOCALVALUE_T`, `MD_HOLDINGVALUE_T`, `MD_LOCALVALUEHISTORY_T` y `CF_SUBSIDIARIES_T`. Cada consulta requiere aprobacion humana. Los fixtures sinteticos representan los tres disparadores del kit: codigo local nuevo sin mapping, cambio de holding que rompe mappings downstream, y valores incorrectos detectados en reporting. Las rutas de catalogo/schema reales y las columnas completas siguen sin verificar.
 
 La estructura es una recomendacion operativa de esta actualizacion [U3], basada en S3/S4. Python 3.12 esta elegido para preparacion; la compatibilidad con Databricks sigue pendiente. Scripts/CLI no excluyen usar notebooks como entrada al mismo paquete.
 

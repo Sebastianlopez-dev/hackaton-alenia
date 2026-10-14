@@ -1,0 +1,44 @@
+{
+  "routing": {
+    "use_case": "UC1",
+    "priority": "high",
+    "subsidiary": "FR",
+    "class": "CONTRACT_TYPE",
+    "affected_local_code": "CT_FR"
+  },
+  "resolution": {
+    "analysis": "Local code CT_FR maps to H_NEW, which is not a valid holding for class CONTRACT_TYPE. The most recent history record shows the mapping was H_OLD before the change, and H_OLD exists and is active. Reverting to H_OLD resolves the broken downstream mapping.",
+    "proposed_correction": "Set MD_LOCALVALUE_T.HOLDINGID to H_OLD for LOCALCODE='CT_FR', CLASSID='CONTRACT_TYPE', SUBSIDIARYCODE='FR'.",
+    "impacted_records": [
+      "CT_FR"
+    ],
+    "evidence": [
+      {
+        "source": "MD_LOCALVALUE_T",
+        "detail": "CT_FR maps to HOLDINGID H_NEW"
+      },
+      {
+        "source": "MD_HOLDINGVALUE_T",
+        "detail": "H_NEW is not a valid holding for class CONTRACT_TYPE"
+      },
+      {
+        "source": "MD_LOCALVALUEHISTORY_T",
+        "detail": "mapping changed from H_OLD on 2026-10-10T09:00:00Z"
+      },
+      {
+        "source": "MD_HOLDINGVALUE_T",
+        "detail": "H_OLD exists and is active for class CONTRACT_TYPE"
+      },
+      {
+        "source": "CF_SUBSIDIARIES_T",
+        "detail": "subsidiary FR context loaded"
+      },
+      {
+        "source": "simulated_precedent",
+        "detail": "ticket 55: revert to previous valid holding when a change breaks the mapping"
+      }
+    ],
+    "confidence": "high",
+    "abstention_reason": null
+  }
+}
