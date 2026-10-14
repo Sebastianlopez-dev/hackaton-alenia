@@ -1,0 +1,62 @@
+# Estado de verificación
+
+Actualizado: 14 de octubre de 2026, rama `codex/uc1-hardening`. Qué está probado, qué es simulación y qué falta. Cada fila cita cómo se comprobó; sin ejecución no hay "verificado".
+
+Comprobar el estado local:
+
+```bash
+PYTHONPATH=src uv run --locked pytest -q
+printf 'approve\n%.0s' $(seq 1 12) | PYTHONPATH=src uv run --locked python -m hackaton_alenia.cli --evaluate
+printf 'approve\n%.0s' $(seq 1 12) | PYTHONPATH=src uv run --locked python -m hackaton_alenia.cli --case uc1_holding_changed_s --evaluate
+printf 'approve\n%.0s' $(seq 1 12) | PYTHONPATH=src uv run --locked python -m hackaton_alenia.cli --case uc1_reporting_mismatch_s --evaluate
+```
+
+## Verificado localmente
+
+Ejecutado en este repositorio, sin servicios externos.
+
+| Capacidad | Evidencia |
+| --- | --- |
+| Routing UC/prioridad y contexto UC1 en una sola llamada | `tests/unit/test_llm.py` |
+| Corrida acotada (`RECURSION_LIMIT`) y abstención explícita | `tests/integration/test_agent_s.py` |
+| Flujo UC1 sobre las 4 tablas oficiales, una aprobación por query | `tests/integration/test_uc1_flows.py`, 3 demos |
+| Aprobación ligada al payload exacto; rechazo, ausencia y payload cambiado bloquean | `tests/unit/test_approvals.py`, verificación independiente T3 6/6 |
+| Auditoría de cada decisión, incluidas las denegadas | `tests/unit/test_audit.py`, `tests/integration/test_cli.py` |
+| SQL que no es una sola lectura: rechazado antes de pedir aprobación y en el adapter | `tests/unit/test_tools.py`, `tests/unit/test_databricks_adapter.py`, verificación independiente T5 5/5 con 20+ intentos de bypass |
+| Secretos enmascarados en `repr`, `str`, `model_dump`, `model_dump_json` y errores | `tests/unit/test_settings.py`, verificación independiente T4 |
+| `ALENIA_MODE` sin fallback de live a simulación | `tests/unit/test_integrations_factory.py`, `tests/integration/test_cli_mode.py` |
+| Sólo `cli.py` y `integrations/factory.py` importan módulos `_s`; todo fixture lleva `_s` | `tests/unit/test_boundary.py` |
+
+## Simulado
+
+Funciona sólo porque el dato está guionado. **No prueba capacidad real.**
+
+| Pieza | Por qué no cuenta como prueba |
+| --- | --- |
+| Modelo (`llm_s.py`) | Respuestas guionadas: no prueba razonamiento, tool calling ni text-to-SQL |
+| Servicios (`services_s.py`) | Sólo ejecuta el SQL exacto listado en `approved_queries` del fixture |
+| Fixtures UC1 (`evals/cases/*_s.json`) | Datos sintéticos propios; columnas `CHANGED_AT`, `NAME`, `COUNTRY` inventadas |
+| Evaluación (`evaluation.py`) | Igualdad exacta contra expectativas propias, no contra la referencia de Alenia |
+
+## Escrito pero sin probar contra Alenia
+
+Probado sólo con `httpx.MockTransport` contra la documentación pública.
+
+| Adaptador | Pendiente |
+| --- | --- |
+| Databricks SQL Statement Execution | Host, warehouse, catálogo, schema y permisos reales |
+| OpenProject API v3 | URL, service account, estados válidos, formato real de la descripción |
+| Mosaic AI Vector Search | Nombre del índice y columnas expuestas |
+
+## Falta
+
+| Pieza | Estado |
+| --- | --- |
+| Adaptador de Model Serving | No existe; requiere una dependencia nueva (decisión del equipo). `ALENIA_MODE=live` se niega a arrancar |
+| Text-to-SQL contra el schema real | Sin probar; requiere el modelo real y el inventario de columnas |
+| Ticket nunca visto | Sin probar |
+| Estados y prioridades oficiales | Valores locales (`review_required`, `resolved`, `low/normal/high/urgent`) |
+| Formato de referencia para accuracy | Desconocido |
+| Review RDD | Sin veredicto: el de T1+T2 está bloqueado en el refuter por config del host; el de T1–T4 quedó sin revisar por decisión del usuario |
+
+Siguiente paso: [primer contacto](primer-contacto.md).

@@ -124,6 +124,8 @@ Copia `.env.example` a `.env` y rellena los valores oficiales. No incluyas secre
 
 ## Documentación
 
+- [Estado de verificación](docs/estado-verificacion.md): qué está probado, qué es simulación y qué falta
+- [Primer contacto con el entorno oficial](docs/primer-contacto.md): runbook del 15 de octubre
 - [Contexto y puntuación](docs/contexto-proyecto.md)
 - [Decisiones](docs/decisiones.md)
 - [Plan y calendario](docs/plan-preparacion.md)
