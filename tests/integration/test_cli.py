@@ -76,3 +76,20 @@ def test_cli_audit_records_an_absent_decision():
     result = _run_cli(["--evaluate"], "")
     assert result.returncode == 1
     assert '"outcome": "absent"' in result.stdout
+
+
+def test_cli_default_flow_is_the_pipeline_and_labels_every_source():
+    result = _run_cli(["--evaluate"], "approve\n" * 6)
+
+    assert result.returncode == 0
+    assert '"flow": "pipeline"' in result.stdout
+    for label in ("[SERVICE]", "[AGENT]", "[SCRIPT]", "[HUMAN]"):
+        assert label in result.stdout
+    assert '"passed": true' in result.stdout
+
+
+def test_cli_agent_flow_is_still_available():
+    result = _run_cli(["--flow", "agent", "--evaluate"], "approve\n" * 6)
+
+    assert result.returncode == 0
+    assert '"passed": true' in result.stdout

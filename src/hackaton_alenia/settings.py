@@ -54,6 +54,11 @@ class Settings(BaseModel):
     # Databricks Model Serving endpoint name used by ChatDatabricks.
     model_serving_endpoint: str | None = Field(default=None, alias="MODEL_SERVING_ENDPOINT")
 
+    # OpenProject status names the UC1 pipeline sets. The official vocabulary
+    # is unknown; read it from GET /api/v3/statuses before filling these in.
+    status_proposal: str | None = Field(default=None, alias="ALENIA_STATUS_PROPOSAL")
+    status_review: str | None = Field(default=None, alias="ALENIA_STATUS_REVIEW")
+
     @field_validator("alenia_mode")
     @classmethod
     def _validate_mode(cls, value: str) -> str:

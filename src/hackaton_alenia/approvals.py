@@ -14,6 +14,9 @@ class ApprovalRequest:
     payload: str
     purpose: str
     token: str = field(default_factory=lambda: uuid4().hex)
+    # Who produced the payload: the model ("agent") or deterministic code
+    # ("script"). Part of the bound request, so it cannot change after display.
+    origin: Literal["agent", "script"] = "agent"
 
 
 @dataclass(frozen=True)
@@ -62,6 +65,7 @@ class AuditEntry:
     purpose: str
     token: str
     outcome: Outcome
+    origin: str = "agent"
     executed: bool = False
 
     def as_dict(self) -> dict:
@@ -75,6 +79,7 @@ class AuditEntry:
             "purpose": self.purpose,
             "token": self.token,
             "outcome": self.outcome,
+            "origin": self.origin,
             "executed": self.executed,
         }
 
@@ -153,6 +158,7 @@ class AuditApprovalGate(ApprovalGate):
                 purpose=request.purpose,
                 token=request.token,
                 outcome=outcome,
+                origin=request.origin,
                 executed=False,
             )
         )

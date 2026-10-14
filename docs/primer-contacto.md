@@ -28,7 +28,7 @@ Anotar cada respuesta con su fuente (persona, canal, hora). Sin respuesta, el va
 | 3 | Mecanismo y límites del SQL: ¿warehouse? ¿solo lectura? ¿cómo se aprueba oficialmente? | `DATABRICKS_WAREHOUSE_ID`, gate de aprobación |
 | 4 | Estados válidos de ticket en OpenProject y prioridades oficiales | `update_status`, `Routing.priority` |
 | 5 | Formato de la salida de referencia con la que se mide el accuracy | `Resolution` |
-| 6 | Endpoint de Model Serving y cómo se autentica | adaptador de modelo (no existe) |
+| 6 | Endpoint de Model Serving y cómo se autentica | `MODEL_SERVING_ENDPOINT` |
 | 7 | Nombre del índice de Vector Search y sus columnas | `DATABRICKS_VECTOR_SEARCH_INDEX_NAME`, `ALENIA_VECTOR_SEARCH_COLUMNS` |
 | 8 | ¿Está permitido el tracing externo? ¿Dónde se ve el coste oficial por ticket? | `LANGSMITH_TRACING`, presentación |
 
@@ -84,7 +84,11 @@ Esperado: una fila, un ticket mapeado a `id/title/description` y precedentes con
 
 ## 6. Lo que todavía bloquea la demo en vivo
 
-- **No existe el adaptador de Model Serving.** `ALENIA_MODE=live` se niega a arrancar hasta que exista. Agregarlo requiere una dependencia nueva: decisión del equipo.
+- **El modelo real nunca respondió.** El pipeline necesita JSON válido en tres pasos (routing, siguiente query, resolución); si el modelo no lo da, el pipeline se abstiene y lo marca `[SCRIPT]`. Probarlo con un ticket descartable antes de la demo:
+
+  ```bash
+  ALENIA_MODE=live PYTHONPATH=src uv run --locked python -m hackaton_alenia.cli --ticket <id_descartable>
+  ```
 - El text-to-SQL contra el schema real no está probado: falta el primer ticket **nunca visto** con el schema real.
 
 ## 7. Cierre de cada paso

@@ -17,9 +17,10 @@ from hackaton_alenia.integrations.contracts import Services
 from hackaton_alenia.sql_guard import read_only_reason
 
 
-def ticket_tools(services: Services, gate: ApprovalGate, active_ticket_id: int):
+def ticket_tools(services: Services, gate: ApprovalGate, active_ticket_id: int, origin: str = "agent"):
+    """Build the five capabilities; ``origin`` labels who produces the payloads."""
     def protect(action, payload, purpose):
-        request = ApprovalRequest(action, active_ticket_id, payload, purpose)
+        request = ApprovalRequest(action, active_ticket_id, payload, purpose, origin=origin)
         gate.require(request)
         return request
 

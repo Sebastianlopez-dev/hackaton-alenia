@@ -21,3 +21,14 @@ def simulated_model(case: dict) -> SimulatedModel:
     responses.append(AIMessage(content="", tool_calls=[{
         "name": Resolution.__name__, "args": case["resolution"], "id": "demo_resolution", "type": "tool_call"}]))
     return SimulatedModel(responses=responses)
+
+
+def pipeline_model(case: dict) -> SimulatedModel:
+    """Replay a fixture for the UC1 pipeline: routing, each query as a next step, done, resolution."""
+    responses: list[BaseMessage] = [AIMessage(content=json.dumps(case["routing"]))]
+    for call in case["tool_calls"]:
+        if call["name"] == "query_sql":
+            responses.append(AIMessage(content=json.dumps({"done": False, **call["args"]})))
+    responses.append(AIMessage(content=json.dumps({"done": True})))
+    responses.append(AIMessage(content=json.dumps(case["resolution"])))
+    return SimulatedModel(responses=responses)
