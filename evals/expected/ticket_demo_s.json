@@ -1,4 +1,14 @@
 {
   "routing": {"use_case": "UC1", "priority": "high"},
-  "resolution": {"analysis": "ABC has no holding mapping; the correct destination remains unverified.", "evidence": [{"source": "simulated_sql", "local_code": "ABC", "holding_id": null}, {"source": "simulated_precedent", "ticket_id": 99}]}
+  "resolution": {
+    "analysis": "ABC has no holding mapping; the correct destination remains unverified.",
+    "proposed_correction": "",
+    "impacted_records": ["ABC"],
+    "evidence": [
+      {"source": "simulated_sql", "detail": "local_code ABC has holding_id null"},
+      {"source": "simulated_precedent", "detail": "ticket 99: check holding candidates before proposing a mapping"}
+    ],
+    "confidence": "low",
+    "abstention_reason": "No holding candidate was confirmed for local code ABC."
+  }
 }
