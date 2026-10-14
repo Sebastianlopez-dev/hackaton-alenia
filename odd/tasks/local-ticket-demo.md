@@ -1,0 +1,24 @@
+# Local ticket demo
+Branch: `codex/local-ticket-demo`; delivery: ask-on-risk, chosen chain: stacked-to-main; forecast ~380 authored lines, actual ~510.
+Runner: `PYTHONPATH=src uv run --locked pytest -q`; local services and model only.
+
+## Specs
+
+- S1: "bien podemos crearlo todo." Scope: the first local LangChain demo, approvals, CLI, evaluation, tests and synthetic fixtures from the proposed file list. No official connections. Keep the existing Ticket fields.
+- S2: "para las cosas que son simulaciones que no iran cuando construyamos vamos a ponerles -s.py al final. Para saber que son simulaciones." The user accepted the compatible `_s.py` alternative with "Perffecto". Runtime simulation modules use `_s.py`; real contracts and controls do not. Simulation fixtures use `_s.json`.
+- S3: "Yo quiero ir con la creación de cada uno de los archivos." Keep responsibilities small and document each file briefly. Approval payload and purpose must be shown; no answer, rejection or changed payload blocks SQL, comments and status. LangChain cannot approve actions.
+- Checks: deterministic RED before implementation, full suite, approved/rejected/absent/changed-payload scenarios, independent approval verification. The normalization fixture is an example, not a final choice of initial UC or an official schema.
+
+## Tasks
+
+- T1a (S1, S3): inline, verified; Ticket, local service contracts and approval controls with unit tests/docs. First chain slice; commit pending.
+- T1b (S1–S3): inline, verified; scripted demo, tools, CLI, evaluation and integration tests/docs. Second slice depends on T1a; commit pending.
+- T2 (S1–S3): delegated verifier, verified; independent security verification in scratch passed, no blockers (risk item 2: approvals). Commit: covered by T1 after delivery strategy choice.
+
+## Log
+
+- L1: User request: "bien podemos crearlo todo. y para las cosas que son simulaciones que no iran cuando construyamos vamos a ponerles -s.py al final. Para saber que son simulaciones.\n\nS"; confirmation of `_s.py`: "Perffecto".
+- L2: Baseline `b7729e4`; existing uncommitted Ticket and its tests belong to this unit. Python 3.12.15, uv 0.13.1, LangChain 1.4.5. Preserve existing dependency lock and `package=false`; run with `PYTHONPATH=src`.
+- L3: RED: approvals/agent imports failed before implementation. GREEN: `PYTHONPATH=src uv run --locked pytest -q`, 29 passed; approved terminal demo and local evaluation passed. Real tracing disabled via host context; scripted values and synthetic SQL explicitly documented. Independent verification next. Authored scope exceeds the ~400-line delivery heuristic; chain strategy remains pending before any work-unit commit.
+- L4: Independent verifier passed S1–S3: approval field binding, stale/forged decisions, cross-ticket actions, CLI exits, source/fixture hashes and zero network attempts inside run_ticket. Direct tool calls outside host tracing context require disabled tracing; documented. Regression tests added for stale and untyped decisions. No commits yet: delivery-strategy decision pending.
+- L5: User accepts "dos entregas encadenadas hacia main: primero contratos y aprobaciones; despues demo y evaluacion" with "si". Strategy: stacked-to-main. Local commits only; no PR, push or merge authorized. Source suite: 31 passed. Independent slices will be checked before commits; RDD assessment uses committed boundaries.

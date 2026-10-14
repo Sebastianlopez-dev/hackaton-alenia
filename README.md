@@ -8,7 +8,7 @@ Preparación para el Alenia AI Ticketing Challenge, 15–16 de octubre de 2026, 
 
 Documentación y dependencias preparadas. Código, demo, tests y evaluación pendientes. Accesos e integraciones oficiales aún sin verificar.
 
-## Instalación
+## 1. Preparar y comprobar el entorno
 
 En macOS o Linux:
 
@@ -32,6 +32,19 @@ En macOS o Linux:
    uv sync --locked
    ```
 
+5. Activar el entorno y comprobarlo:
+
+   ```bash
+   source .venv/bin/activate
+   uv --version
+   python --version
+   which python
+   ```
+
+   Esperado: Python `3.12.x` y una ruta terminada en `.venv/bin/python`.
+
+   Para salir del entorno: `deactivate`.
+
 Repetir en cada equipo; no copiar `.venv`. Versionar `pyproject.toml`, `uv.lock` y `.python-version`.
 
 `requirements.txt` es una exportación; no editarlo a mano. Para regenerarlo:
@@ -40,7 +53,7 @@ Repetir en cada equipo; no copiar `.venv`. Versionar `pyproject.toml`, `uv.lock`
 uv export --locked --format requirements-txt --output-file requirements.txt
 ```
 
-## Desarrollo
+## 2. Desarrollo
 
 1. Leer [AGENTS.md](AGENTS.md), [decisiones](docs/decisiones.md) y [arquitectura](docs/arquitectura.md).
 2. Elegir el primer UC y construir una demo mock con pruebas y evaluación.
