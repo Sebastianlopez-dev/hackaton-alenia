@@ -20,6 +20,43 @@ class ConfigurationError(Exception):
     """The requested mode cannot be satisfied with the supplied settings."""
 
 
+MODEL_TIMEOUT_SECONDS = 60
+MODEL_MAX_RETRIES = 1
+
+
+def build_model(settings: Settings) -> Any:
+    """Return the Databricks Model Serving chat model for live mode.
+
+    Written against databricks-langchain 0.21.0 and untested against
+    Alenia's endpoint. ChatDatabricks reads ``DATABRICKS_HOST`` and
+    ``DATABRICKS_TOKEN`` from the environment, the same variables Settings
+    reads, and connects lazily on the first call. A ``WorkspaceClient`` is
+    deliberately not built here: constructing one performs network I/O and
+    blocked for more than 45 s against an unreachable host. The import is
+    local so simulation runs never load mlflow and the Databricks stack.
+    """
+    required: dict[str, object | None] = {
+        "MODEL_SERVING_ENDPOINT": settings.model_serving_endpoint,
+        "DATABRICKS_HOST": settings.databricks_host,
+        "DATABRICKS_TOKEN": settings.databricks_token,
+    }
+    missing = [name for name, value in required.items() if value is None]
+    if missing:
+        raise ConfigurationError("Live model missing required settings: " + ", ".join(missing))
+
+    import os
+
+    os.environ.setdefault("MLFLOW_DISABLE_AGENT_HINT", "1")
+    from databricks_langchain import ChatDatabricks
+
+    return ChatDatabricks(
+        endpoint=settings.model_serving_endpoint,
+        temperature=0,
+        timeout=MODEL_TIMEOUT_SECONDS,
+        max_retries=MODEL_MAX_RETRIES,
+    )
+
+
 class LiveServices:
     """Composite that delegates each capability to its official adapter."""
 

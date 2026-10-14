@@ -51,6 +51,9 @@ class Settings(BaseModel):
     # official column set is unknown, so it is a setting, not a guess in code.
     vector_search_columns: list[str] = Field(default_factory=list, alias="ALENIA_VECTOR_SEARCH_COLUMNS")
 
+    # Databricks Model Serving endpoint name used by ChatDatabricks.
+    model_serving_endpoint: str | None = Field(default=None, alias="MODEL_SERVING_ENDPOINT")
+
     @field_validator("alenia_mode")
     @classmethod
     def _validate_mode(cls, value: str) -> str:
