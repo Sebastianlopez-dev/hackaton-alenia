@@ -1,6 +1,6 @@
 # Arquitectura para iniciar el desarrollo
 
-Actualizado: 13 de octubre de 2026. Fuentes: [P1, S3, S4, U2 y U3](fuentes-contexto.md). Este diseno consolida lo discutido y lo adapta al contrato oficial; aun no hay codigo implementado.
+Actualizado: 14 de octubre de 2026. Fuentes: [P1, S3, S4, U2 y U3](fuentes-contexto.md). La demo local usa LangChain con modelo y servicios simulados; las integraciones oficiales siguen pendientes.
 
 ## Flujo y responsabilidades
 
@@ -49,15 +49,16 @@ hackaton-alenia/
   .gitignore
   src/hackaton_alenia/
     settings.py
-    domain.py             # Ticket, Route, Evidence, ApprovalRequest, Resolution
+    ticket.py             # informacion capturada del ticket
     approvals.py          # guard y registro de decisiones
     integrations/
       contracts.py        # interfaces de tools oficiales y SQL
-      mock.py
+      services_s.py       # respuestas y acciones simuladas en memoria
       databricks.py       # SQL/model endpoint oficial, cuando haya acceso
       openproject.py      # contrato oficial, cuando haya acceso
       retrieval.py        # herramienta Mosaic AI oficial
     llm.py                # adaptador compatible con el endpoint proporcionado
+    llm_s.py              # modelo guionado para la demo local
     tools.py              # LangChain tools sobre contratos y guard
     agent.py              # understand -> investigate -> resolve
     cli.py                # demo, aprobaciones y evaluacion
@@ -73,7 +74,13 @@ hackaton-alenia/
   docs/
 ```
 
-La estructura es una recomendacion operativa de esta actualizacion [U3], basada en S3/S4. La version Python y dependencias se fijan tras comprobar el runtime Databricks. Scripts/CLI no excluyen usar notebooks como entrada al mismo paquete.
+Por decision del usuario (14 de octubre), `ticket.py` sustituye el nombre propuesto `domain.py`: contiene la informacion capturada del ticket. El modelo local inicial `Ticket` tiene `id` (entero), `title` y `description` (texto), todos obligatorios. No lee OpenProject ni analiza el ticket; los campos de la API oficial siguen pendientes de verificacion.
+
+El sufijo `_s.py` identifica los modulos simulados. `llm.py` clasifica mediante el modelo recibido; aun no hay adaptador Model Serving. La demo UC1 es un ejemplo guionado, no una eleccion definitiva ni cobertura completa de UC1. `demo_mapping`, `review_required` y las prioridades son valores locales, no nombres oficiales. SQL solo compara el texto con el fixture y devuelve filas sinteticas; no ejecuta una base de datos. Las trazas externas se desactivan durante el agente.
+
+Ejecutar mediante la CLI o `run_ticket`, que desactiva tracing externo. Invocar tools directamente fuera de ese contexto requiere mantener `LANGSMITH_TRACING=false`.
+
+La estructura es una recomendacion operativa de esta actualizacion [U3], basada en S3/S4. Python 3.12 esta elegido para preparacion; la compatibilidad con Databricks sigue pendiente. Scripts/CLI no excluyen usar notebooks como entrada al mismo paquete.
 
 ## Modelo de datos oficial
 

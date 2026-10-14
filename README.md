@@ -6,7 +6,7 @@ Preparación para el Alenia AI Ticketing Challenge, 15–16 de octubre de 2026, 
 
 ## Estado
 
-Documentación y dependencias preparadas. Código, demo, tests y evaluación pendientes. Accesos e integraciones oficiales aún sin verificar.
+Demo local LangChain con modelo y servicios simulados. Accesos e integraciones oficiales aún sin verificar.
 
 ## 1. Preparar y comprobar el entorno
 
@@ -55,9 +55,39 @@ uv export --locked --format requirements-txt --output-file requirements.txt
 
 ## 2. Desarrollo
 
+Desde la raíz, ejecutar la demo:
+
+```bash
+PYTHONPATH=src uv run --locked python -m hackaton_alenia.cli --evaluate
+```
+
+Muestra payload y propósito; escribir `approve` para cada acción. Rechazo o falta de respuesta bloquean la ejecución. Modelo y resultados están guionados: no prueba razonamiento de IA ni integraciones reales.
+
+Ejecutar las pruebas:
+
+```bash
+PYTHONPATH=src uv run --locked pytest -q
+```
+
 1. Leer [AGENTS.md](AGENTS.md), [decisiones](docs/decisiones.md) y [arquitectura](docs/arquitectura.md).
-2. Elegir el primer UC y construir una demo mock con pruebas y evaluación.
+2. Revisar los archivos de la demo. El ejemplo UC1 no fija la elección del primer UC.
 3. Verificar [compatibilidad con Databricks](docs/compatibilidad-databricks.md) y contratos oficiales antes de conectar servicios reales.
+
+| Archivo en `src/hackaton_alenia/` | Responsabilidad |
+| --- | --- |
+| `ticket.py` | Información del ticket |
+| `settings.py` | Rutas locales |
+| `integrations/contracts.py` | Interfaces locales de servicios |
+| `integrations/services_s.py` | Servicios simulados en memoria |
+| `approvals.py` | Decisión humana ligada al payload exacto |
+| `llm.py` | Clasificación de UC y prioridad |
+| `llm_s.py` | Respuestas simuladas del modelo |
+| `tools.py` | Tools permitidas con guard de aprobación |
+| `agent.py` | Coordinación LangChain |
+| `cli.py` | Demo y aprobaciones por terminal |
+| `evaluation.py` | Comparación con expectativas locales |
+
+`_s.py` identifica simulaciones; casos y expectativas están en `evals/` como `_s.json`. Los mocks pueden conservarse para pruebas cuando se incorporen adaptadores reales.
 
 ## Reglas clave
 

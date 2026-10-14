@@ -13,7 +13,7 @@ Revisado al **13 de octubre de 2026**, zona Europe/Madrid. La ventana original *
 | OpenProject Docker Compose stable/17, HTTP localhost:8080 | Reportado en U2; salud/API pendiente |
 | Token OpenProject | Creado segun U2; no consultado ni guardado en Git |
 | Databricks, modelo, retrieval y proyecto oficial | Infraestructura proporcionada segun P1; acceso del equipo no verificado |
-| Codigo, demo y evaluacion | Aun no implementados en este checkout |
+| Codigo, demo y evaluacion | Demo local LangChain guionada, aprobaciones por terminal y evaluacion local implementadas el 14 de octubre; integraciones reales pendientes |
 | Entorno Python de preparacion | Python 3.12 elegido (U4); uv.lock y requirements exportado. Instalacion en Linux Python 3.12.14 y smoke de schema/tool/agente simulado correctos; Mac y Databricks no comprobados |
 | Markdown v2 e historial completo | Recuperacion pendiente; no frena el inicio con contrato oficial conocido |
 
