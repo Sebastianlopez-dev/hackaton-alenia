@@ -4,12 +4,17 @@ Every capability follows the same order: the active ticket is checked, the
 host-owned approval gate is asked for this exact request, and only then the
 service runs. A capability failure comes back to the model as data so the
 investigation can continue; a human refusal always stops the run.
+
+A SQL statement that is not recognised as a single read is refused before
+the human is asked: no data-write permission is documented, so it could
+never be executed, and the model gets the reason to rewrite it as a read.
 """
 
 from langchain_core.tools import tool
 
 from hackaton_alenia.approvals import ApprovalDenied, ApprovalGate, ApprovalRequest
 from hackaton_alenia.integrations.contracts import Services
+from hackaton_alenia.sql_guard import read_only_reason
 
 
 def ticket_tools(services: Services, gate: ApprovalGate, active_ticket_id: int):
@@ -53,6 +58,9 @@ def ticket_tools(services: Services, gate: ApprovalGate, active_ticket_id: int):
     def query_sql(sql: str, purpose: str) -> list[dict] | dict:
         """Request human approval before querying the ticket's data. A failure returns an error object."""
         def call() -> list[dict]:
+            reason = read_only_reason(sql)
+            if reason:
+                raise ValueError(f"Statement refused: not a single read ({reason}). Rewrite it as one SELECT.")
             request = protect("sql", sql, purpose)
             result = services.query_sql(sql)
             mark_executed(request.token)

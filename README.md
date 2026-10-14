@@ -94,7 +94,7 @@ PYTHONPATH=src uv run --locked pytest -q
 | `llm.py` | Clasificación de UC, prioridad y contexto UC1 opcional; contrato de resolución y lectura tolerante de la respuesta del modelo |
 | `llm_s.py` | Respuestas simuladas del modelo |
 | `tools.py` | Tools permitidas con guard de aprobación; un fallo de capacidad vuelve al modelo como dato |
-| `sql_guard.py` | Clasificación sólo-lectura a nivel de statement; guard rail, no frontera de seguridad |
+| `sql_guard.py` | Clasificación sólo-lectura a nivel de statement; un SQL que no es una sola lectura se rechaza antes de pedir aprobación. Guard rail, no frontera de seguridad |
 | `agent.py` | Coordinación LangChain con límite de pasos y abstención |
 | `cli.py` | Demo, aprobaciones por terminal y selección de fixture |
 | `evaluation.py` | Comparación con expectativas locales |

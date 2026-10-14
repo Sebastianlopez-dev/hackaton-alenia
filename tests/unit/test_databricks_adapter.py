@@ -201,3 +201,16 @@ def test_query_refuses_a_truncated_result():
 
     with pytest.raises(DatabricksSQLError, match="TRUNCATED"):
         _client(httpx.MockTransport(handler)).query_sql("SELECT n FROM t")
+
+
+def test_adapter_refuses_a_statement_that_can_write_without_contacting_the_warehouse():
+    requests = []
+
+    def handler(request: httpx.Request):
+        requests.append(request)
+        return httpx.Response(200, json=_succeeded({"data_array": []}))
+
+    with pytest.raises(DatabricksSQLError, match="NOT_READ_ONLY"):
+        _client(httpx.MockTransport(handler)).query_sql("UPDATE MD_LOCALVALUE_T SET HOLDINGID = 'X'")
+
+    assert requests == []

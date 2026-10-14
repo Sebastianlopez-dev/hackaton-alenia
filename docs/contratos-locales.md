@@ -21,6 +21,10 @@ Sin aprobacion explicita para esa solicitud, la accion se bloquea. Una respuesta
 
 El mensaje de aprobacion solo afirma que una accion `sql` es de solo lectura cuando `sql_guard` la reconoce como una lectura unica. Si no la reconoce, muestra `NOT VERIFIED AS READ-ONLY` junto con el motivo, y la ejecucion sigue detras de la aprobacion humana.
 
+Un statement que `sql_guard` no reconoce como una lectura unica se rechaza antes de pedir aprobacion: `query_sql` devuelve el motivo al modelo como `{"error": ...}` para que lo reescriba como un SELECT, y el adapter de Databricks lo rechaza tambien (`NOT_READ_ONLY`) sin contactar el warehouse. No hay permiso documentado para escribir datos. La frontera real sigue siendo la credencial: usar una credencial o un warehouse de solo lectura.
+
+`tests/unit/test_boundary.py` fija la frontera simulacion/real: solo `cli.py` e `integrations/factory.py` pueden importar modulos `_s`, y todo fixture de `evals/` lleva el sufijo `_s`.
+
 Pruebas desde la raiz:
 
 ```bash

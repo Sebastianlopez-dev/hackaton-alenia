@@ -25,6 +25,8 @@ from typing import Any
 
 import httpx
 
+from hackaton_alenia.sql_guard import read_only_reason
+
 
 class DatabricksSQLError(Exception):
     """A SQL statement reached a terminal non-success state."""
@@ -63,8 +65,13 @@ class DatabricksSQLClient:
         """Submit ``sql`` and return rows as dictionaries.
 
         The API may return synchronously or require polling; both paths are
-        handled. Terminal states other than ``SUCCEEDED`` raise.
+        handled. Terminal states other than ``SUCCEEDED`` raise. A statement
+        not recognised as a single read is refused before the warehouse is
+        contacted; the credential's permissions remain the real boundary.
         """
+        reason = read_only_reason(sql)
+        if reason:
+            raise DatabricksSQLError("NOT_READ_ONLY", reason)
         response = self.client.post(
             "/api/2.0/sql/statements",
             json={
